@@ -1,8 +1,7 @@
 const { WebClient }             = require('@slack/web-api'),
       { createEventAdapter }    = require('@slack/events-api'),
       { createMessageAdapter }  = require('@slack/interactive-messages'),
-      { createReadStream }      = require('fs'),
-      events                    = require('events');
+      { createReadStream }      = require('fs');
 
 // this class is specifically for the slacbot for bots from other platforms create a new class
 class SlackBot {
