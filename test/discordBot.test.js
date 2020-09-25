@@ -4,12 +4,12 @@ require('dotenv').config();
 
 const discordBot = new DiscordBot();
 
-describe('discordBot', function() {
-  beforeEach(async() => {
+describe('discordBot', () => {
+  beforeEach(async () => {
     discordBot.start();
   })
 
-  it('test discord bot service', async () => {
+  it('test discord bot service', () => {
     assert.ok(discordBot, 'discordBot is ok');
   })
   
