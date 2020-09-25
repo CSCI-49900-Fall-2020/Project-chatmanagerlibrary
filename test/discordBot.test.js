@@ -5,7 +5,7 @@ require('dotenv').config();
 const discordBot = new DiscordBot();
 
 describe('discordBot', () => {
-  beforeEach(async () => {
+  beforeEach(() => {
     discordBot.start();
   })
 
