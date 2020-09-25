@@ -1,5 +1,4 @@
 const Discord = require('discord.js');
-const PREFIX = '*';
 
 class DiscordBot {
   constructor() {
@@ -22,6 +21,7 @@ class DiscordBot {
     });
 
     client.on('message', async message => {
+      const PREFIX = '*';
       if (message.content.startsWith(PREFIX)) {
         const input = message.content.slice(PREFIX.length).trim().split(' ');
         const command = input.shift();
