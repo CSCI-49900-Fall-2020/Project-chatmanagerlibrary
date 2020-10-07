@@ -1,0 +1,29 @@
+var POST_URL = "http://02b47c3814ce.ngrok.io";
+
+function onSubmit(e) {
+  var form = FormApp.getActiveForm();
+  var formResponses = form.getResponses();
+  var formLastResponse = formResponses[formResponses.length - 1];
+  var formLastResponseItems = formLastResponse.getItemResponses();
+  var questionsAndAnswers = [];
+  for(var i = 0; i < formLastResponseItems.length; i++) {
+    var question = formLastResponseItems[i].getItem().getTitle();
+    var answer = formLastResponseItems[i].getResponse();
+    questionsAndAnswers.push({
+      "question": question,
+      "answer"  : answer
+    })
+  }
+  
+  UrlFetchApp.fetch(POST_URL, {
+    "method": "post",
+    "contentType": "application/json",
+    "payload": JSON.stringify({
+      "content": questionsAndAnswers
+    })
+  })
+};
+
+
+
+COPY AND PASTE INTO GOOGLE FORMS APPSCRIPT TO FORWARD RESPONSES TO DISCORD BOT
