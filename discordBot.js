@@ -20,7 +20,7 @@ class DiscordBot {
           const input = message.content.slice(this.prefix.length).trim().split(' ');
           const command = input.shift();
           const commandArgs = input.join(' ');
-          this.onCommandReceived(command, commandArgs);
+          this.onCommandReceived(command, commandArgs, 'discord');
         }
       }
     });

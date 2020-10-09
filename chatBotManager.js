@@ -58,6 +58,10 @@ class ChatBotManager {
     if (this.discordBot) {
       this.discordBot.setCommandListener(eventListener);
     }
+
+    if (this.slackBot) {
+      this.slackBot.setCommandListener(eventListener);
+    }
   }
 
   sendMessageToAllChannels(data) {

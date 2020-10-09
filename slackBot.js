@@ -11,6 +11,7 @@ class SlackBot {
         this.slackEvents = createEventAdapter(slackSigningSecret);
         this.slackInteractiveMessages = createMessageAdapter(slackSigningSecret);
         this.webClient = new WebClient(slackBotToken);
+        this.prefix = '~';
       } catch(err){
         console.log(err);
       }
@@ -23,9 +24,26 @@ class SlackBot {
         console.log(`Events server has started on ${eventsServer.address().port}`);
         const interactiveMessagesServer = await this.slackInteractiveMessages.start(slackInteractiveMessagesPort);
         console.log(`InteractiveMessages server has started on ${interactiveMessagesServer.address().port}`);
+        
+        this.slackEvents.on('message', (message) => {
+          console.log(message)
+          if (message.text.startsWith(this.prefix)) {
+            if (this.onCommandReceived) {
+              const input = message.text.slice(this.prefix.length).trim().split(' ');
+              const command = input.shift();
+              const commandArgs = input.join(' ');
+              this.onCommandReceived(command, commandArgs, 'slack');
+            }
+          }
+        })
+        
       } catch(err){
         console.log(err);
       }
+    }
+
+    setCommandListener(commandListener) {
+      this.onCommandReceived = commandListener;
     }
 
     // listens for when users submit forms, it takes the modal callback id as an input. use this after sending a form to get user responses
