@@ -71,6 +71,10 @@ class SlackBot {
         console.log(err);
       }
     }
+
+    sendMessageToAllChannels() {
+      console.log('send message to all channel on slack');
+    }
 }
 
 exports.SlackBot = SlackBot;
