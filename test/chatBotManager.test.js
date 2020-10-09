@@ -49,4 +49,13 @@ describe('chatBotManager', () => {
 
     assert.ok(res, 'send group message to discord is ok');
   });
+
+  it('test send group message to slack', async () => {
+    const res = await chatBotManager.sendMessageToAllChannels({
+      platform: 'slack',
+      message: 'hello'
+    });
+
+    assert.ok(res, 'send group message to slack is ok');
+  });
 })

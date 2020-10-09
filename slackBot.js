@@ -72,8 +72,20 @@ class SlackBot {
       }
     }
 
-    sendMessageToAllChannels() {
-      console.log('send message to all channel on slack');
+    sendMessageToChannel(channelId, message) {
+      const data = {
+        channel: channelId,
+        text: message
+      };
+      return this.webClient.chat.postMessage(data);
+    }
+
+    async sendMessageToAllChannels(message) {
+      const res = await this.webClient.conversations.list();
+      const sendMessages = res.channels
+        .filter(channel => channel.is_member)
+        .map(channel => this.sendMessageToChannel(channel.id, message))
+      return Promise.all(sendMessages);
     }
 }
 

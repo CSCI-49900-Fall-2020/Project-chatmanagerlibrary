@@ -5,7 +5,7 @@ class DiscordBot {
     const client = new Discord.Client();
     this.client = client;
     this.token = token;
-    this.prefix = '*';
+    this.prefix = '/';
   }
 
   setCommandListener(commandListener) {
@@ -17,7 +17,7 @@ class DiscordBot {
     client.on('message', (message) => {
       if (message.content.startsWith(this.prefix)) {
         if (this.onCommandReceived) {
-          const input = message.content.slice(PREFIX.length).trim().split(' ');
+          const input = message.content.slice(this.prefix.length).trim().split(' ');
           const command = input.shift();
           const commandArgs = input.join(' ');
           this.onCommandReceived(command, commandArgs);

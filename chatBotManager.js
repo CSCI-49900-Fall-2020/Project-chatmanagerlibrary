@@ -54,6 +54,12 @@ class ChatBotManager {
     return allPromise;
   }
 
+  setupCommandListener(eventListener) {
+    if (this.discordBot) {
+      this.discordBot.setCommandListener(eventListener);
+    }
+  }
+
   sendMessageToAllChannels(data) {
     const {
       platform,
