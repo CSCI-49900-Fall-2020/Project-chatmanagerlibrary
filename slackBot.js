@@ -24,7 +24,7 @@ class SlackBot {
         console.log(`Events server has started on ${eventsServer.address().port}`);
         const interactiveMessagesServer = await this.slackInteractiveMessages.start(slackInteractiveMessagesPort);
         console.log(`InteractiveMessages server has started on ${interactiveMessagesServer.address().port}`);
-        
+
         this.slackEvents.on('message', (message) => {
           if (message.text.startsWith(this.prefix)) {
             if (this.onCommandReceived) {

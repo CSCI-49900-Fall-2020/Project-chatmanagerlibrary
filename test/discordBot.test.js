@@ -5,7 +5,7 @@ require('dotenv').config();
 const discordBot = new DiscordBot(process.env.DISCORD_BOT_TOKEN);
 
 describe('discordBot', () => {
-  before((done) => {    
+  before((done) => {
     discordBot.start();
     discordBot.client.once('ready', () => {
       done();
