@@ -13,12 +13,8 @@ class ChatBotManager {
       const {
         oauthToken,
         signingSecret,
-        eventPort,
-        interactiveMessagePort,
       } = slackBotConfig;
-
-      const slackBot = new SlackBot(oauthToken, signingSecret);
-      this.slackBot = slackBot;
+      this.slackBot = new SlackBot(oauthToken, signingSecret);
     }
 
     // check if we have discord config
@@ -26,9 +22,7 @@ class ChatBotManager {
       const {
         token: discordToken,
       } = discordBotConfig;
-
-      const discordBot = new DiscordBot(discordToken);
-      this.discordBot = discordBot;
+      this.discordBot = new DiscordBot(discordToken);
     }
     this.option = option;
   }
@@ -43,20 +37,21 @@ class ChatBotManager {
 
     if (this.slackBot) {
       const {
-      eventPort,
-      interactiveMessagePort,
-      slackEventAPIPath,
-    } = this.option.slackBotConfig;
+        eventPort,
+        interactiveMessagePort,
+        slackEventAPIPath,
+      } = this.option.slackBotConfig;
 
-    // create an slack app if there's no existing app running
-    if (app) {
-      if (slackEventAPIPath == null) {
-        throw 'slackEventAPIPath is not provided for slack event listener'
+      // create an slack app if there's no existing app running
+      if (app) {
+        if (slackEventAPIPath == null) {
+          throw 'slackEventAPIPath is not provided for slack event listener'
+        }
+        app.use(this.option.slackEventAPIPath, this.slackBot.slackEvents.requestListener());  
+      } else {
+        const res = this.slackBot.start(eventPort, interactiveMessagePort);  
+        allPromise.push(res);
       }
-      app.use(this.option.slackEventAPIPath, this.slackBot.slackEvents.requestListener());  
-    } else {
-      const res = this.slackBot.start(eventPort, interactiveMessagePort);  
-      allPromise.push(res);
     }
 
     return allPromise;
