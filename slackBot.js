@@ -26,7 +26,6 @@ class SlackBot {
         console.log(`InteractiveMessages server has started on ${interactiveMessagesServer.address().port}`);
         
         this.slackEvents.on('message', (message) => {
-          console.log(message)
           if (message.text.startsWith(this.prefix)) {
             if (this.onCommandReceived) {
               const input = message.text.slice(this.prefix.length).trim().split(' ');
