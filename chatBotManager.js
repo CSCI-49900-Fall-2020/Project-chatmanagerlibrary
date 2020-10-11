@@ -47,7 +47,7 @@ class ChatBotManager {
         if (slackEventAPIPath == null) {
           throw 'slackEventAPIPath is not provided for slack event listener'
         }
-        app.use(this.option.slackEventAPIPath, this.slackBot.slackEvents.requestListener());  
+        app.use(slackEventAPIPath, this.slackBot.slackEvents.requestListener());
       } else {
         const res = this.slackBot.start(eventPort, interactiveMessagePort);  
         allPromise.push(res);
