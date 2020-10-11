@@ -17,7 +17,7 @@ describe('discordBot', () => {
   });
 
   it('test getMembers', async () => {
-    const members = await discordBot.getMembers().map(m => m.username);  
+    const members = await discordBot.getMembers().map(m => m.username);
     assert.ok(members, 'getMembers is ok');
   });
 
