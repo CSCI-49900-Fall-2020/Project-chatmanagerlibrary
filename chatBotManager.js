@@ -33,7 +33,7 @@ class ChatBotManager {
     this.option = option;
   }
 
-  start() {
+  start(app) {
     const allPromise = [];
 
     if (this.discordBot) {
@@ -45,9 +45,17 @@ class ChatBotManager {
       const {
       eventPort,
       interactiveMessagePort,
+      slackEventAPIPath,
     } = this.option.slackBotConfig;
 
-     const res = this.slackBot.start(eventPort, interactiveMessagePort);
+    // create an slack app if there's no existing app running
+    if (app) {
+      if (slackEventAPIPath == null) {
+        throw 'slackEventAPIPath is not provided for slack event listener'
+      }
+      app.use(this.option.slackEventAPIPath, this.slackBot.slackEvents.requestListener());  
+    } else {
+      const res = this.slackBot.start(eventPort, interactiveMessagePort);  
       allPromise.push(res);
     }
 

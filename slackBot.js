@@ -24,24 +24,22 @@ class SlackBot {
         console.log(`Events server has started on ${eventsServer.address().port}`);
         const interactiveMessagesServer = await this.slackInteractiveMessages.start(slackInteractiveMessagesPort);
         console.log(`InteractiveMessages server has started on ${interactiveMessagesServer.address().port}`);
-
-        this.slackEvents.on('message', (message) => {
-          if (message.text.startsWith(this.prefix)) {
-            if (this.onCommandReceived) {
-              const input = message.text.slice(this.prefix.length).trim().split(' ');
-              const command = input.shift();
-              const commandArgs = input.join(' ');
-              this.onCommandReceived(command, commandArgs, 'slack');
-            }
-          }
-        })
-        
       } catch(err){
         console.log(err);
       }
     }
 
     setCommandListener(commandListener) {
+      this.slackEvents.on('message', (message) => {
+        if (message.text.startsWith(this.prefix)) {
+          if (this.onCommandReceived) {
+            const input = message.text.slice(this.prefix.length).trim().split(' ');
+            const command = input.shift();
+            const commandArgs = input.join(' ');
+            this.onCommandReceived(command, commandArgs, 'slack');
+          }
+        }
+      });
       this.onCommandReceived = commandListener;
     }
 
