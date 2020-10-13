@@ -11,6 +11,7 @@ class SlackBot {
         this.slackEvents = createEventAdapter(slackSigningSecret);
         this.slackInteractiveMessages = createMessageAdapter(slackSigningSecret);
         this.webClient = new WebClient(slackBotToken);
+        this.prefix = '~';
       } catch(err){
         console.log(err);
       }
@@ -26,6 +27,20 @@ class SlackBot {
       } catch(err){
         console.log(err);
       }
+    }
+
+    setCommandListener(commandListener) {
+      this.slackEvents.on('message', (message) => {
+        if (message.text.startsWith(this.prefix)) {
+          if (this.onCommandReceived) {
+            const input = message.text.slice(this.prefix.length).trim().split(' ');
+            const command = input.shift();
+            const commandArgs = input.join(' ');
+            this.onCommandReceived(command, commandArgs, 'slack');
+          }
+        }
+      });
+      this.onCommandReceived = commandListener;
     }
 
     // listens for when users submit forms, it takes the modal callback id as an input. use this after sending a form to get user responses
@@ -70,6 +85,22 @@ class SlackBot {
       } catch(err){
         console.log(err);
       }
+    }
+
+    sendMessageToChannel(channelId, message) {
+      const data = {
+        channel: channelId,
+        text: message
+      };
+      return this.webClient.chat.postMessage(data);
+    }
+
+    async sendMessageToAllChannels(message) {
+      const res = await this.webClient.conversations.list();
+      const sendMessages = res.channels
+        .filter(channel => channel.is_member)
+        .map(channel => this.sendMessageToChannel(channel.id, message))
+      return Promise.all(sendMessages);
     }
 }
 

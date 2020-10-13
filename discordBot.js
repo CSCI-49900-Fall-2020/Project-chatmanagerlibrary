@@ -1,49 +1,31 @@
 const Discord = require('discord.js');
 
 class DiscordBot {
-  constructor() {
+  constructor(token) {
     const client = new Discord.Client();
     this.client = client;
+    this.token = token;
+    this.prefix = '/';
+  }
+
+  setCommandListener(commandListener) {
+    this.onCommandReceived = commandListener;
   }
 
   start() {
-    const token = process.env.DISCORD_BOT_TOKEN;
     const client = this.client;
-    client.once('ready', () => {
-      console.log('Discord Ready!');
-    });
-
-    client.on('guildMemberAdd', member => {
-      const channel = member.guild.channels.cache.find(ch => ch.name === 'member-log');
-
-      if (!channel) return;
-      channel.send(`Welcome to the server, ${member}`);
-    });
-
-    client.on('message', async message => {
-      const PREFIX = '*';
-      if (message.content.startsWith(PREFIX)) {
-        const input = message.content.slice(PREFIX.length).trim().split(' ');
-        const command = input.shift();
-        const commandArgs = input.join(' ');
-
-        if (command === 'pm') {
-          //TODO parse the argument
-          message.channel.send(`send a private message: ${commandArgs}`);
-        }
-
-        if (command === 'gm') {
-          message.channel.send(`send a group message: ${commandArgs}`);
-        }
-
-        if (command === 'm') {
-          const usernames = await this.getMembers().map(m => m.username);
-          message.channel.send(`Here are all the members: ${usernames}`);
+    client.on('message', (message) => {
+      if (message.content.startsWith(this.prefix)) {
+        if (this.onCommandReceived) {
+          const input = message.content.slice(this.prefix.length).trim().split(' ');
+          const command = input.shift();
+          const commandArgs = input.join(' ');
+          this.onCommandReceived(command, commandArgs, 'discord');
         }
       }
     });
-
-     return client.login(token);
+    
+     return client.login(this.token);
   }
 
   sendMessageToAllChannels(msg) {
@@ -56,6 +38,10 @@ class DiscordBot {
 
   getMembers() {
     return this.client.users.cache;
+  }
+
+  stop() {
+    return this.client.destroy();
   }
 }
 
