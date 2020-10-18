@@ -38,4 +38,3 @@
 <img src="https://user-images.githubusercontent.com/47549128/96357189-76f0e580-10c6-11eb-8289-dd9af8011149.png" width="400">
 
 6. Now, you just finished adding the bot to slack.
-<img src="https://user-images.githubusercontent.com/47549128/96357071-8111e480-10c4-11eb-9a6b-6785048b62fc.png" width="400">
