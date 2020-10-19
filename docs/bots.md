@@ -43,3 +43,11 @@
 <img src="https://user-images.githubusercontent.com/47549128/96357189-76f0e580-10c6-11eb-8289-dd9af8011149.png" width="400">
 
 6. Now, you just finished adding the bot to slack.
+
+7. If you wanna add the bot to the general channel, click **general**
+<img src="https://user-images.githubusercontent.com/47549128/96404552-33bb7300-11a9-11eb-8919-000b550f2301.png" width="400">
+
+8. Type **@the_bot_you_wanna_add**, for example, **@test**, then send the message
+<img src="https://user-images.githubusercontent.com/47549128/96404553-34540980-11a9-11eb-913b-ca2f9c27e194.png" width="400">
+
+9. Click **Invite to Channel**
