@@ -51,4 +51,4 @@
 <img src="https://user-images.githubusercontent.com/47549128/96405234-cf99ae80-11aa-11eb-900c-2887fcbd88c9.png" width="400">
 
 9. Click **Invite to Channel**
-<img src="(https://user-images.githubusercontent.com/47549128/96404553-34540980-11a9-11eb-913b-ca2f9c27e194.png" width="400">
+<img src="https://user-images.githubusercontent.com/47549128/96404553-34540980-11a9-11eb-913b-ca2f9c27e194.png" width="400">
