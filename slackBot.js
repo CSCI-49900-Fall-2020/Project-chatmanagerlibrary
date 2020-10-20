@@ -102,6 +102,11 @@ class SlackBot {
         .map(channel => this.sendMessageToChannel(channel.id, message))
       return Promise.all(sendMessages);
     }
+
+    stop(slackEventsPort = 3000, slackInteractiveMessagesPort = 3001){
+      this.slackEvents.stop(slackEventsPort);
+      this.slackInteractiveMessages.stop(slackInteractiveMessagesPort);
+    }
 }
 
 exports.SlackBot = SlackBot;
