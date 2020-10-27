@@ -68,7 +68,7 @@
 <img src="https://user-images.githubusercontent.com/47549128/97238449-d7b3a880-17bf-11eb-846f-2c2a6080ebd1.png" width="400">
 
 5. Click **Subscribe to bot events**, you could add message.channels and message.im
-    <img src="https://user-images.githubusercontent.com/47549128/97236401-712c8b80-17bb-11eb-8fd6-29334a72c108.png" width="400">
+<img src="https://user-images.githubusercontent.com/47549128/97236401-712c8b80-17bb-11eb-8fd6-29334a72c108.png" width="400">
 
 6. Remember to click **Save**
 
