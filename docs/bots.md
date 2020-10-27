@@ -52,3 +52,24 @@
 
 9. Click **Invite to Channel**
 <img src="https://user-images.githubusercontent.com/47549128/96404553-34540980-11a9-11eb-913b-ca2f9c27e194.png" width="400">
+
+# How to setup slack event api
+1. Click `https://ngrok.com/`, download ngrok
+
+2. After finished downloading ngrok, you could do 
+    ```sh
+    $ngrok http 3030
+    ```
+
+3. Copy the http address follow the first **Forwarding**, which is in the format of http://blablabla.ngrok.io
+
+4. Go to the app settings for **Event Subscriptions** `https://api.slack.com/apps/{appId}/event-subscriptions`, **Enable Event** and paste the ngrok address you just copied under **Request URL**, remember to add `/slack-event`, so the Request URL would look like:
+    `http://blablabla.ngrok.io/slack-event`
+<img src="https://user-images.githubusercontent.com/47549128/97238449-d7b3a880-17bf-11eb-846f-2c2a6080ebd1.png" width="400">
+
+5. Click **Subscribe to bot events**, you could add message.channels and message.im
+    <img src="https://user-images.githubusercontent.com/47549128/97236401-712c8b80-17bb-11eb-8fd6-29334a72c108.png" width="400">
+
+6. Remember to click **Save**
+
+7. Click **reinstall** the app for the worksapce if asked.
