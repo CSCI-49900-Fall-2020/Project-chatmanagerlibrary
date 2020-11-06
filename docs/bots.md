@@ -60,16 +60,16 @@
     ```sh
     $ngrok http 3030
     ```
-
 3. Copy the http address follow the first **Forwarding**, which is in the format of http://blablabla.ngrok.io
 
-4. Go to the app settings for **Event Subscriptions** `https://api.slack.com/apps/{appId}/event-subscriptions`, **Enable Event** and paste the ngrok address you just copied under **Request URL**, remember to add `/slack-event`, so the Request URL would look like:
-    `http://blablabla.ngrok.io/slack-event`
-<img src="https://user-images.githubusercontent.com/47549128/97238449-d7b3a880-17bf-11eb-846f-2c2a6080ebd1.png" width="400">
+4. Go to the app settings for **Slash Commands** `https://api.slack.com/apps/{appId}/Slash Commands`, click **Create New Command** 
+<img src="https://user-images.githubusercontent.com/47549128/98397635-a348b380-202d-11eb-8745-907539150e7d.png" width="400">
 
-5. Click **Subscribe to bot events**, you could add message.channels and message.im
-<img src="https://user-images.githubusercontent.com/47549128/97236401-712c8b80-17bb-11eb-8fd6-29334a72c108.png" width="400">
+5. Add the command name, Request URL, remember the ngrok address you copied in step 3? paste it under **Request URL**, remember to add `/slack-command`, so the Request URL would look like:
+    `http://blahblahblah.ngrok.io/slack-command`
+   Don't forget click **save**
+<img src="https://user-images.githubusercontent.com/47549128/98397634-a348b380-202d-11eb-916d-fab9058411cc.png" width="400">
 
-6. Remember to click **Save**
+6. You could always add more commands here, but remember to use the same URL address.
+<img src="https://user-images.githubusercontent.com/47549128/98397616-9deb6900-202d-11eb-8d78-d2a3b3105434.png" width="400">
 
-7. Click **reinstall** the app for the worksapce if asked.
