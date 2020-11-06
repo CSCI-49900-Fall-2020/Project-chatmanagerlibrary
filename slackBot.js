@@ -107,6 +107,15 @@ class SlackBot {
       this.slackEvents.stop(slackEventsPort);
       this.slackInteractiveMessages.stop(slackInteractiveMessagesPort);
     }
+
+    // can add a custom command
+    addCustomCommand(command, callback){
+      this.slackEvents.on('message', (message) => {
+        if (message.text.split(' ')[0] == command) {
+          callback(message);
+        }
+      });
+    }
 }
 
 exports.SlackBot = SlackBot;

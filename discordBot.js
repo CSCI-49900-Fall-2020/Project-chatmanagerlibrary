@@ -1,9 +1,9 @@
-const Discord = require('discord.js');
+const {Client, MessageAttachment} = require('discord.js');
+const http = require('http')
 
 class DiscordBot {
   constructor(token) {
-    const client = new Discord.Client();
-    this.client = client;
+    this.client = new Client();
     this.token = token;
     this.prefix = '/';
   }
@@ -42,6 +42,47 @@ class DiscordBot {
 
   stop() {
     return this.client.destroy();
+  }
+
+  // send files to discord channel given the file path and channel
+  sendFile(filePath, channelId){
+    this.client.on('ready', () => {
+      var attachment = new MessageAttachment(filePath);
+      this.client.channels.cache.get(channelId).send(attachment);
+      return 'success';  
+    })    
+  }
+
+  //sends a link to a google form to the specifies channel
+  sendGoogleForm(googleFormUrl, channelId){
+    this.client.on('ready', () => {
+      this.client.channels.cache.get(channelId).send(googleFormUrl);
+      return 'success';
+    })
+  }
+
+  //gets results everytime a google form is submitted
+  listenForGoogleFormSubmissions(port, callback){
+    http.createServer((request) => {
+      let answers = [];
+      request.on('error', (err) => {
+        return err;
+      }).on('data', (bodyData) => {
+        answers.push(bodyData);
+      }).on('end', async () => {
+        answers = await Buffer.concat(answers).toString();
+        callback(answers);
+      })
+    }).listen(port);
+  }
+
+  // can add a custom command
+  addCustomCommand(command, callback){
+    this.client.on('message', (message) => {
+      if (message.content.split(' ')[0] == command) {
+          callback(message);
+      }
+    })
   }
 }
 
