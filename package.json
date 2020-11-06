@@ -2,7 +2,7 @@
   "name": "chat_manager_library",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "chatBotManager.js",
   "scripts": {
     "test": "mocha test/ --recursive --exit --timeout 20000"
   },

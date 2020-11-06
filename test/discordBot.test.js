@@ -3,7 +3,7 @@ const DiscordBot = require('../discordBot')
 require('dotenv').config();
 
 const discordBot = new DiscordBot(process.env.DISCORD_BOT_TOKEN);
-channelId = 'Enter Channel Here';
+channelId = process.env.TEST_DISCORD_CHANNEL;
 
 describe('discordBot', () => {
   before((done) => {
@@ -28,13 +28,11 @@ describe('discordBot', () => {
   });
 
   it('test sendFile', async () => {
-    const res = await discordBot.sendFile('../src/test_files/source.gif', channelId);
-    assert.ok(res, 'sendFile is ok');
+    discordBot.sendFile('../src/test_files/source.gif', channelId, (response) => {response.then(function(res){assert.ok(res, 'sendFile is ok')})});
   });
 
   it('test sendGoogleForm', async() => {
-    const res = await discordBot.sendGoogleForm('https://forms.gle/Beyb8EuojwJwqXTw9', channelId);
-    assert.ok(res, 'sendGoogleForm is ok')
+    discordBot.sendGoogleForm('https://forms.gle/Beyb8EuojwJwqXTw9', channelId, (response) => {response.then(function(res){assert.ok(res, 'sendFile is ok')})});
   })
   
 });

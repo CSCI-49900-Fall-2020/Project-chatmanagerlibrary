@@ -45,19 +45,17 @@ class DiscordBot {
   }
 
   // send files to discord channel given the file path and channel
-  sendFile(filePath, channelId){
+  sendFile(filePath, channelId, callback){
     this.client.on('ready', () => {
       var attachment = new MessageAttachment(filePath);
-      this.client.channels.cache.get(channelId).send(attachment);
-      return 'success';  
+      return callback(this.client.channels.cache.get(channelId).send(attachment));
     })    
   }
 
   //sends a link to a google form to the specifies channel
-  sendGoogleForm(googleFormUrl, channelId){
+  sendGoogleForm(googleFormUrl, channelId, callback){
     this.client.on('ready', () => {
-      this.client.channels.cache.get(channelId).send(googleFormUrl);
-      return 'success';
+      return callback(this.client.channels.cache.get(channelId).send(googleFormUrl));
     })
   }
 
