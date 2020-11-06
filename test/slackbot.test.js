@@ -31,6 +31,11 @@ describe('slackBot', () => {
         assert.ok(res, 'getChannels is not working');
     })
 
+    it('test getMembers', async () => {
+        const members = await slackBot.getMembers();
+        assert.ok(channels);
+    });
+
     it('test sendForm', () => {
         const messageToOpenForm = {
             "blocks": [
