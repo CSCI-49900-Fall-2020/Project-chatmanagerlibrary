@@ -2,7 +2,7 @@ const assert = require('assert');
 const { SlackBot } = require('../slackBot')
 require('dotenv').config();
 
-const slackBot = new SlackBot(process.env.SLACK_BOT_TOKEN, process.env.SLACK_SIGNING_SECRET)
+const slackBot = new SlackBot(process.env.SLACK_BOT_OAUTH_TOKEN, process.env.SLACK_SIGNING_SECRET)
 const slackChannel = 'Enter Channel Here'
 
 describe('slackBot', () => {
@@ -24,6 +24,11 @@ describe('slackBot', () => {
         slackBot.sendFile(slackChannel, '../src/test_files/source.gif', (response) => {
             assert.ok(response, 'sendFile is not working');
         })
+    })
+
+    it('test getChannels', async() => {
+        const res = await slackBot.getChannels();
+        assert.ok(res, 'getChannels is not working');
     })
 
     it('test sendForm', () => {
