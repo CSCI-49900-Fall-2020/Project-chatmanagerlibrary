@@ -53,7 +53,7 @@
 9. Click **Invite to Channel**
 <img src="https://user-images.githubusercontent.com/47549128/96404553-34540980-11a9-11eb-913b-ca2f9c27e194.png" width="400">
 
-# How to setup slack event api
+# How to setup slack slash commands
 1. Click `https://ngrok.com/`, download ngrok
 
 2. After finished downloading ngrok, you could do 
