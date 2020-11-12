@@ -45,17 +45,17 @@ class DiscordBot {
   }
 
   // send files to discord channel given the file path and channel
-  sendFile(filePath, channelId, callback){
-    this.client.on('ready', () => {
+  async sendFile(filePath, channelId, callback){
+    this.client.on('ready', async () => {
       var attachment = new MessageAttachment(filePath);
-      return callback(this.client.channels.cache.get(channelId).send(attachment));
+      this.client.channels.cache.get(channelId).send(attachment).then(callback);
     })    
   }
 
   //sends a link to a google form to the specifies channel
   sendGoogleForm(googleFormUrl, channelId, callback){
     this.client.on('ready', () => {
-      return callback(this.client.channels.cache.get(channelId).send(googleFormUrl));
+      return callback(this.client.channels.cache.get(channelId).send(googleFormUrl)).then(callback);
     })
   }
 
@@ -70,6 +70,7 @@ class DiscordBot {
       }).on('end', async () => {
         answers = await Buffer.concat(answers).toString();
         callback(answers);
+
       })
     }).listen(port);
   }
