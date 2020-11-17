@@ -29,6 +29,14 @@ class SlackBot {
       }
     }
 
+    eventsExpressMiddleware(req,res,next) {
+      return this.slackEvents.expressMiddleware(req,res,next);
+    }
+
+    interactiveMessagesExpressMiddleware(req,res,next) {
+      return this.slackInteractiveMessages.expressMiddleware(req,res,next);
+    }
+
     setCommandListener(commandListener) {
       this.slackEvents.on('message', (message) => {
         if (message.text.startsWith(this.prefix)) {

@@ -1,5 +1,5 @@
 {
-  "name": "chat_manager_library",
+  "name": "@chat_manager_library/chat_manager_library",
   "version": "1.0.0",
   "description": "",
   "main": "chatBotManager.js",
@@ -12,7 +12,9 @@
     "@slack/events-api": "^2.3.4",
     "@slack/interactive-messages": "^1.7.0",
     "@slack/web-api": "^5.12.0",
-    "discord.js": "^12.3.1"
+    "body-parser": "^1.19.0",
+    "discord.js": "^12.3.1",
+    "events": "^3.2.0"
   },
   "devDependencies": {
     "assert": "^2.0.0",

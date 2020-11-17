@@ -1,5 +1,8 @@
 const {Client, MessageAttachment} = require('discord.js');
-const http = require('http')
+const http = require('http');
+const {EventEmitter} = require('events');
+
+const emitter = new EventEmitter();
 
 class DiscordBot {
   constructor(token) {
@@ -70,9 +73,26 @@ class DiscordBot {
       }).on('end', async () => {
         answers = await Buffer.concat(answers).toString();
         callback(answers);
-
       })
     }).listen(port);
+  }
+
+  listenForFormsWithExpress(callback){
+    emitter.on('formSubmitted', (data) => {
+      callback(data);
+    })
+  }
+
+  formsExpressMiddleware(req,res,next){
+    let answers = [];
+    req.on('error', (err) => {
+      return err;
+    }).on('data', (bodyData) => {
+      answers.push(bodyData);
+    }).on('end', async () => {
+      answers = await Buffer.concat(answers).toString();
+      emitter.emit('formSubmitted', answers)
+    })
   }
 
   // can add a custom command
