@@ -3,7 +3,7 @@ const { SlackBot } = require('../slackBot')
 require('dotenv').config();
 
 const slackBot = new SlackBot(process.env.SLACK_BOT_OAUTH_TOKEN, process.env.SLACK_SIGNING_SECRET)
-const slackChannel = 'Enter Channel Here'
+const slackChannel = process.env.TEST_SLACK_CHANNEL
 
 describe('slackBot', () => {
     before((done) => {

@@ -1,9 +1,12 @@
-const Discord = require('discord.js');
+const {Client, MessageAttachment} = require('discord.js');
+const http = require('http');
+const {EventEmitter} = require('events');
+
+const emitter = new EventEmitter();
 
 class DiscordBot {
   constructor(token) {
-    const client = new Discord.Client();
-    this.client = client;
+    this.client = new Client();
     this.token = token;
     this.prefix = '/';
   }
@@ -59,6 +62,63 @@ class DiscordBot {
 
   stop() {
     return this.client.destroy();
+  }
+
+  // send files to discord channel given the file path and channel
+  async sendFile(filePath, channelId, callback){
+    this.client.on('ready', async () => {
+      var attachment = new MessageAttachment(filePath);
+      this.client.channels.cache.get(channelId).send(attachment).then(callback);
+    })    
+  }
+
+  //sends a link to a google form to the specifies channel
+  sendGoogleForm(googleFormUrl, channelId, callback){
+    this.client.on('ready', () => {
+      return callback(this.client.channels.cache.get(channelId).send(googleFormUrl)).then(callback);
+    })
+  }
+
+  //gets results everytime a google form is submitted
+  listenForGoogleFormSubmissions(port, callback){
+    http.createServer((request) => {
+      let answers = [];
+      request.on('error', (err) => {
+        return err;
+      }).on('data', (bodyData) => {
+        answers.push(bodyData);
+      }).on('end', async () => {
+        answers = await Buffer.concat(answers).toString();
+        callback(answers);
+      })
+    }).listen(port);
+  }
+
+  listenForFormsWithExpress(callback){
+    emitter.on('formSubmitted', (data) => {
+      callback(data);
+    })
+  }
+
+  formsExpressMiddleware(req,res,next){
+    let answers = [];
+    req.on('error', (err) => {
+      return err;
+    }).on('data', (bodyData) => {
+      answers.push(bodyData);
+    }).on('end', async () => {
+      answers = await Buffer.concat(answers).toString();
+      emitter.emit('formSubmitted', answers)
+    })
+  }
+
+  // can add a custom command
+  addCustomCommand(command, callback){
+    this.client.on('message', (message) => {
+      if (message.content.split(' ')[0] == command) {
+          callback(message);
+      }
+    })
   }
 }
 

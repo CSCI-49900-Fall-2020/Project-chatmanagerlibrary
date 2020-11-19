@@ -29,6 +29,14 @@ class SlackBot {
       }
     }
 
+    eventsExpressMiddleware(req,res,next) {
+      return this.slackEvents.expressMiddleware(req,res,next);
+    }
+
+    interactiveMessagesExpressMiddleware(req,res,next) {
+      return this.slackInteractiveMessages.expressMiddleware(req,res,next);
+    }
+      
     getSlashCommandListener() {
         return async (req, res, next) => {
             if (this.onCommandReceived) {
@@ -136,6 +144,15 @@ class SlackBot {
     stop(slackEventsPort = 3000, slackInteractiveMessagesPort = 3001){
       this.slackEvents.stop(slackEventsPort);
       this.slackInteractiveMessages.stop(slackInteractiveMessagesPort);
+    }
+
+    // can add a custom command
+    addCustomCommand(command, callback){
+      this.slackEvents.on('message', (message) => {
+        if (message.text.split(' ')[0] == command) {
+          callback(message);
+        }
+      });
     }
 }
 
