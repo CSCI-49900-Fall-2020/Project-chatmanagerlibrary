@@ -36,6 +36,17 @@ class SlackBot {
     interactiveMessagesExpressMiddleware(req,res,next) {
       return this.slackInteractiveMessages.expressMiddleware(req,res,next);
     }
+      
+    getSlashCommandListener() {
+        return async (req, res, next) => {
+            if (this.onCommandReceived) {
+                const commandArgs = req.body.text;
+                const command = req.body.command.substring(1);
+                const result = await this.onCommandReceived(command, commandArgs, 'slack');
+                res.json(result);
+            }
+        }
+    }
 
     setCommandListener(commandListener) {
       this.slackEvents.on('message', (message) => {
@@ -110,6 +121,25 @@ class SlackBot {
         .map(channel => this.sendMessageToChannel(channel.id, message))
       return Promise.all(sendMessages);
     }
+
+    async sendMessageChannel(channelId, message) {
+      return this.sendMessageToChannel(channelId, message);
+    }
+
+    async getChannels() {
+      const ch = await this.webClient.conversations.list();
+      return ch.channels
+        .filter(channel => channel.is_member)
+        .map(channel => ({
+          id: channel.id,
+          name: channel.name,
+        })); 
+    }
+
+    getMembers() {
+        return this.webClient.users.list();
+    }
+
 
     stop(slackEventsPort = 3000, slackInteractiveMessagesPort = 3001){
       this.slackEvents.stop(slackEventsPort);

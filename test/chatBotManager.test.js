@@ -58,4 +58,14 @@ describe('chatBotManager', () => {
 
     assert.ok(res, 'send group message to slack is ok');
   });
+
+  it('test all getChannels', async () => {
+    const res = await chatBotManager.getChannels();
+    assert.ok(res);
+  });
+
+  it('test getMembers', async () => {
+    const members = await chatBotManager.getMembers();
+    assert.ok(members);
+  });
 })

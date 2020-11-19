@@ -36,4 +36,13 @@ describe('discordBot', () => {
     discordBot.sendGoogleForm(googleFormUrl, channelId, (res) => {assert.ok(res, 'sendGoogleForm is ok')});
   })
   
+  it('test getChannels', async () => {
+    const channels = await discordBot.getChannels();
+    assert.ok(channels, 'getChannels is ok');
+  });
+
+  it('test getMembers', async () => {
+    const members = await discordBot.getMembers();
+    assert.ok(members);
+  });
 });

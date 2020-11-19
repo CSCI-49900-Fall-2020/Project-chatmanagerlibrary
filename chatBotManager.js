@@ -40,14 +40,16 @@ class ChatBotManager {
         eventPort,
         interactiveMessagePort,
         slackEventAPIPath,
+        slackSlashCommandPath,
       } = this.option.slackBotConfig;
 
       // create an slack app if there's no existing app running
       if (app) {
-        if (slackEventAPIPath == null) {
-          throw 'slackEventAPIPath is not provided for slack event listener'
+        if (slackSlashCommandPath == null) {
+          throw 'slackSlashCommandPath is not provided for slack command slash listener'
         }
-        app.use(slackEventAPIPath, this.slackBot.slackEvents.requestListener());
+
+        app.use('/slack-command', this.slackBot.getSlashCommandListener());
       } else {
         const res = this.slackBot.start(eventPort, interactiveMessagePort);  
         allPromise.push(res);
@@ -88,6 +90,85 @@ class ChatBotManager {
     } else {
       throw `platform ${platform} bot is not configured`;
     }
+  }
+
+  sendMessageChannel(data) {
+    const {
+      platform,
+      channelId,
+      message,
+    } = data;
+
+    if (platform === 'slack') {
+      if (this.slackBot) {
+        return this.slackBot.sendMessageChannel(channelId, message);
+      } else {
+        throw 'slack bot is not configured';
+      }
+    } else if (platform === 'discord') {
+      if (this.discordBot) {
+        return this.discordBot.sendMessageChannel(channelId, message);
+      } else {
+        throw 'discord bot is not configured';
+      }
+    } else {
+      throw `platform ${platform} bot is not configured`;
+    }
+  }
+
+  // return all the channels from multiple platforms
+  async getChannels() {
+    const channels = [];
+
+    if (this.slackBot) {
+      const slackChannels = await this.slackBot.getChannels();  
+      for (const ch of slackChannels) {
+        channels.push({
+          id: ch.id,
+          name: ch.name,
+          platform: 'slack'
+        });
+      }
+    }
+    
+    if (this.discordBot) {
+      const discordChannels = await this.discordBot.getChannels();
+      for (const ch of discordChannels) {
+        channels.push({
+          id: ch.id,
+          name: ch.name,
+          platform: 'discord'
+        })
+      }
+    }
+
+    return channels;
+  }
+
+  async getMembers() {
+    const members = [];
+    if (this.slackBot) {
+      const res = await this.slackBot.getMembers();
+      for (const user of res.members) {
+        members.push({
+          id: user.id,
+          name: user.name,
+          platform: 'slack'
+        })
+      }
+    }
+
+    if (this.discordBot) {
+      const res = await this.discordBot.getMembers();
+      for (const user of res) {
+        members.push({
+          id: user.id,
+          name: user.username,
+          platform: 'discord'
+        })
+      }
+    }
+    return members;
   }
 
   stop() {
