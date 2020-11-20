@@ -110,6 +110,7 @@ class DiscordBot {
       answers = await Buffer.concat(answers).toString();
       emitter.emit('formSubmitted', answers)
     })
+    next();
   }
 
   // can add a custom command
@@ -117,6 +118,14 @@ class DiscordBot {
     this.client.on('message', (message) => {
       if (message.content.split(' ')[0] == command) {
           callback(message);
+      }
+    })
+  }
+
+  listenForFiles(callback) {
+    this.client.on('message', (message) => {
+      if(message.attachments.size > 0){
+        callback(message.attachments);
       }
     })
   }
