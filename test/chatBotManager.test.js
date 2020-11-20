@@ -2,6 +2,9 @@ const assert = require('assert');
 const ChatBotManager = require('../chatBotManager')
 require('dotenv').config();
 
+const slackTestUserId = process.env.SLACK_TEST_USER
+const discordTestUserId = process.env.DISCORD_TEST_USER;
+
 const option = {
   slackBotConfig: {
     oauthToken: process.env.SLACK_BOT_OAUTH_TOKEN,
@@ -68,4 +71,25 @@ describe('chatBotManager', () => {
     const members = await chatBotManager.getMembers();
     assert.ok(members);
   });
+
+  it('test send direct message to discord', async () => {
+    const res = await chatBotManager.sendDirectMessage({
+      platform: 'discord',
+      userId: discordTestUserId,
+      message: 'direct_hello'
+    });
+
+    assert.ok(res, 'send direct message to discord is ok');
+  });
+
+  it('test send direct message to slack', async () => {
+    const res = await chatBotManager.sendDirectMessage({
+      platform: 'slack',
+      userId: slackTestUserId,
+      message: 'direct_hello'
+    });
+
+    assert.ok(res, 'send direct message to slack is ok');
+  });
 })
+

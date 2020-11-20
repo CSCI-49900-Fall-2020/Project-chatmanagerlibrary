@@ -114,7 +114,7 @@ class SlackBot {
       return Promise.all(sendMessages);
     }
 
-    async sendMessageChannel(channelId, message) {
+    sendMessageChannel(channelId, message) {
       return this.sendMessageToChannel(channelId, message);
     }
 
@@ -132,6 +132,14 @@ class SlackBot {
         return this.webClient.users.list();
     }
 
+    sendDirectMessage(userId, message) {
+        const data = {
+            channel: userId,
+            text: message,
+            as_user: true
+        };
+        return this.webClient.chat.postMessage(data);
+    }
 
     stop(slackEventsPort = 3000, slackInteractiveMessagesPort = 3001){
       this.slackEvents.stop(slackEventsPort);
