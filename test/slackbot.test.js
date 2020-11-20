@@ -4,6 +4,7 @@ require('dotenv').config();
 
 const slackBot = new SlackBot(process.env.SLACK_BOT_OAUTH_TOKEN, process.env.SLACK_SIGNING_SECRET)
 const slackChannel = process.env.TEST_SLACK_CHANNEL
+const slackTestUserId = process.env.SLACK_TEST_USER
 
 describe('slackBot', () => {
     before((done) => {
@@ -34,6 +35,11 @@ describe('slackBot', () => {
     it('test getMembers', async () => {
         const members = await slackBot.getMembers();
         assert.ok(channels);
+    });
+
+    it('test sendDirectMessage', async () => {
+        const tmp = await slackBot.sendDirectMessage(slackTestUserId, 'direct message');
+        assert.ok(tmp,'sendDirectMessage is not working');
     });
 
     it('test sendForm', () => {

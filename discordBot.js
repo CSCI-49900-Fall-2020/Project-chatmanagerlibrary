@@ -32,32 +32,82 @@ class DiscordBot {
      return client.login(this.token);
   }
 
-  sendMessageToAllChannels(msg) {
-    const sendAll = this.client.channels.cache
-      .filter(ch => ch.type == 'text')
-      .map(ch => ch.send(msg));
+  async sendMessageToAllChannels(msg) {
+    const channels = await this.fetchChannelsInternal();
+    const sendAll = channels.map(ch => ch.send(msg));
 
     return Promise.all(sendAll);
   }
 
-  sendMessageChannel(channelId, message) {
-    return this.client.channels.cache
-      .get(channelId)
-      .send(message);
+  async sendMessageChannel(channelId, message) {
+    const channel = await this.client.channels.fetch(channelId)
+    return channel.send(message);
   }
 
-  getChannels() {
-    // filter the voice channel
-    return this.client.channels.cache
-        .filter(ch => ch.type == 'text')
-        .map(channel => ({
-      id: channel.id,
-      name: channel.name,
-    }));
+  // fetch the channels from discord sserver
+  async fetchChannelsInternal() {
+    let allChannels = [];
+
+    // fetch the members from all guilds to make sure the member is updated to date
+    let guilds = this.client.guilds.cache.array();
+    for (let guild of guilds) {
+      await guild.fetch();
+
+      // filter to get text channel only
+      const channels = guild.channels.cache.array()
+          .filter(ch => ch.type == 'text');
+
+      for (let channel of channels) {
+        allChannels.push(channel);
+      }
+    }
+
+    return allChannels;
+  }
+
+  async getChannels() {
+    const channels = await this.fetchChannelsInternal();
+    return channels.map(ch => ({
+      id: ch.id,
+      name: ch.name,
+    }))
   }
 
   async getMembers() {
-    return this.client.users.cache.array();
+    let allMembers = [];
+
+    // fetch the members from all guilds to make sure the member is updated to date
+    let guilds = this.client.guilds.cache.array();
+    for (let guild of guilds) {
+      await guild.fetch();
+
+      // fetch the member on each guild
+      const members = await guild.members.fetch();
+      const guildMembers = members.array();
+      for (const guildMember of guildMembers) {
+        allMembers.push({
+          id: guildMember.user.id,
+          name: guildMember.user.username,
+        });
+      }
+    }
+
+    // remove the duplicated users
+    const uniqueIds = [];
+    allMembers = allMembers.filter(member => {
+      if (uniqueIds.includes(member.id)) {
+        return false;
+      }
+      uniqueIds.push(member.id);
+      return true;
+    })
+
+    return allMembers;
+  }
+
+  async sendDirectMessage(userId, message) {
+    const user = await this.client.users.fetch(userId);
+    return user.send(message);
   }
 
   stop() {

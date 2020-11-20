@@ -171,6 +171,30 @@ class ChatBotManager {
     return members;
   }
 
+  sendDirectMessage(data) {
+    const {
+      platform,
+      userId,
+      message,
+    } = data;
+
+    if (platform === 'slack') {
+      if (this.slackBot) {
+        return this.slackBot.sendDirectMessage(userId, message);
+      } else {
+        throw 'slack bot is not configured';
+      }
+    } else if (platform === 'discord') {
+      if (this.discordBot) {
+        return this.discordBot.sendDirectMessage(userId, message);
+      } else {
+        throw 'discord bot is not configured';
+      }
+    } else {
+      throw `platform ${platform} bot is not configured`;
+    }
+  }
+
   stop() {
     if (this.discordBot) {
       this.discordBot.stop();
