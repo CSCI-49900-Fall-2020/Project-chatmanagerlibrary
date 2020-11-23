@@ -163,7 +163,7 @@ class ChatBotManager {
       for (const user of res) {
         members.push({
           id: user.id,
-          name: user.username,
+          name: user.name,
           platform: 'discord'
         })
       }
