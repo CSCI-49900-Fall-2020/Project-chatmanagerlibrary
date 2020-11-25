@@ -8,6 +8,14 @@ class DiscordCommands {
     function setBotStatus(bot, status){
         bot.user.setStatus(status);
     }
+
+    function sendMessageToUser(bot, id, message){
+        bot.users.fetch(id)
+        .then((user) => {
+          user.send(message);
+         })
+        .catch(message => console.log((message)));
+    }
     
   }
 
