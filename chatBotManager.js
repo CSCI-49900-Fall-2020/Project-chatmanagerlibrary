@@ -1,6 +1,7 @@
 const DiscordBot = require('./discordBot')
 const { SlackBot } = require('./slackBot');
 const User = require('./user');
+const DiscordCommands = require('./discord-command');
 
 /* 
   ChatBotManager class is the wrapper class that manages the functions of discord, slack, and team. As a wrapper 
