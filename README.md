@@ -3,6 +3,8 @@
 
 **Title:** Chat Manager
 
+**Title:** 
+
 **Date:** September 8, 2020
 
 **Getting Started**
