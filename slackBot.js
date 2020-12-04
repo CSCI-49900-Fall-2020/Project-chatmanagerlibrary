@@ -149,6 +149,24 @@ class SlackBot {
         return this.webClient.chat.postMessage(data);
     }
 
+    sendFileToUser(userId, url) {
+        const data = {
+            channel: userId,
+            text: url,
+            as_user: true
+        };
+        return this.webClient.chat.postMessage(data);
+    }
+
+    sendFileToChannel(userId, url) {
+        const data = {
+            channel: userId,
+            text: url,
+            as_user: true
+        };
+        return this.webClient.chat.postMessage(data);
+    }
+
     stop(slackEventsPort = 3000, slackInteractiveMessagesPort = 3001){
       this.slackEvents.stop(slackEventsPort);
       this.slackInteractiveMessages.stop(slackInteractiveMessagesPort);

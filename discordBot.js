@@ -28,8 +28,8 @@ class DiscordBot {
         }
       }
     });
-    
-     return client.login(this.token);
+
+    return client.login(this.token);
   }
 
   async sendMessageToAllChannels(msg) {
@@ -40,11 +40,11 @@ class DiscordBot {
   }
 
   async sendMessageChannel(channelId, message) {
-    const channel = await this.client.channels.fetch(channelId)
+    const channel = await this.client.channels.fetch(channelId);
     return channel.send(message);
   }
 
-  // fetch the channels from discord sserver
+  // fetch the channels from discord server
   async fetchChannelsInternal() {
     let allChannels = [];
 
@@ -112,6 +112,18 @@ class DiscordBot {
 
   stop() {
     return this.client.destroy();
+  }
+
+  async sendFileToChannel(channelId, url) {
+    const channel = await this.client.channels.fetch(channelId);
+    const attachment = new MessageAttachment(url);
+    return channel.send(attachment);
+  }
+
+  async sendFileToUser(userId, url) {
+    const user = await this.client.users.fetch(userId);
+    const attachment = new MessageAttachment(url);
+    return user.send(attachment);
   }
 
   // send files to discord channel given the file path and channel
