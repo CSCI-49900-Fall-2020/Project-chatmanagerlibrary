@@ -195,6 +195,54 @@ class ChatBotManager {
     }
   }
 
+  sendFileToChannel(data) {
+    const {
+      platform,
+      channelId,
+      url,
+    } = data;
+
+    if (platform === 'slack') {
+      if (this.slackBot) {
+        return this.slackBot.sendFileToChannel(channelId, url);
+      } else {
+        throw 'slack bot is not configured';
+      }
+    } else if (platform === 'discord') {
+      if (this.discordBot) {
+        return this.discordBot.sendFileToChannel(channelId, url);
+      } else {
+        throw 'discord bot is not configured';
+      }
+    } else {
+      throw `platform ${platform} bot is not configured`;
+    }
+  }
+
+  sendFileToUser(data) {
+    const {
+      platform,
+      userId,
+      url,
+    } = data;
+
+    if (platform === 'slack') {
+      if (this.slackBot) {
+        return this.slackBot.sendFileToUser(userId, url);
+      } else {
+        throw 'slack bot is not configured';
+      }
+    } else if (platform === 'discord') {
+      if (this.discordBot) {
+        return this.discordBot.sendFileToUser(userId, url);
+      } else {
+        throw 'discord bot is not configured';
+      }
+    } else {
+      throw `platform ${platform} bot is not configured`;
+    }
+  }
+
   stop() {
     if (this.discordBot) {
       this.discordBot.stop();

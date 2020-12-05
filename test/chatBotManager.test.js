@@ -2,8 +2,10 @@ const assert = require('assert');
 const ChatBotManager = require('../chatBotManager')
 require('dotenv').config();
 
-const slackTestUserId = process.env.SLACK_TEST_USER
+const slackTestUserId = process.env.SLACK_TEST_USER;
+const slackTestChannelId = process.env.TEST_SLACK_CHANNEL;
 const discordTestUserId = process.env.DISCORD_TEST_USER;
+const discordTestChannelId = process.env.DISCORD_TEST_CHANNEL;
 
 const option = {
   slackBotConfig: {
@@ -78,7 +80,6 @@ describe('chatBotManager', () => {
       userId: discordTestUserId,
       message: 'direct_hello'
     });
-
     assert.ok(res, 'send direct message to discord is ok');
   });
 
@@ -86,10 +87,63 @@ describe('chatBotManager', () => {
     const res = await chatBotManager.sendDirectMessage({
       platform: 'slack',
       userId: slackTestUserId,
-      message: 'direct_hello'
+      message: 'direct_message_hello'
     });
-
     assert.ok(res, 'send direct message to slack is ok');
+  });
+
+  it('test send group message to discord', async () => {
+    const res = await chatBotManager.sendMessageChannel({
+      platform: 'discord',
+      channelId: discordTestChannelId,
+      message: 'group_channel_hello'
+    });
+    assert.ok(res, 'send group message to discord is ok');
+  });
+
+  it('test send group message to slack', async () => {
+    const res = await chatBotManager.sendMessageChannel({
+      platform: 'slack',
+      channelId: slackTestChannelId,
+      message: 'group_message_hello'
+    });
+    assert.ok(res, 'send group message to slack is ok');
+  });
+
+  it('test send file to discord user', async () => {
+    const res = await chatBotManager.sendFileToUser({
+      platform: 'discord',
+      userId: discordTestUserId,
+      url: 'https://i.imgur.com/w3duR07.png'
+    });
+    assert.ok(res, 'send a file to discord user is ok');
+  });
+
+  it('test send file to slack user', async () => {
+    const res = await chatBotManager.sendFileToUser({
+      platform: 'slack',
+      userId: slackTestUserId,
+      url: 'https://i.imgur.com/w3duR07.png'
+    });
+    assert.ok(res, 'send a file to slack user is ok');
+  });
+
+  it('test send file to discord channel', async () => {
+    const res = await chatBotManager.sendFileToChannel({
+      platform: 'discord',
+      channelId: discordTestChannelId,
+      url: 'https://i.imgur.com/w3duR07.png'
+    });
+    assert.ok(res, 'send a file to discord channel is ok');
+  });
+
+  it('test send file to slack user', async () => {
+    const res = await chatBotManager.sendFileToChannel({
+      platform: 'slack',
+      channelId: slackTestChannelId,
+      url: 'https://i.imgur.com/w3duR07.png'
+    });
+    assert.ok(res, 'send a file to slack channel is ok');
   });
 })
 

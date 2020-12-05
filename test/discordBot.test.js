@@ -29,6 +29,10 @@ describe('discordBot', () => {
     assert.ok(res, 'sendMessageToAllChannels is ok');
   });
 
+  it('test sendMessageChannel', async () => {
+    const res = await discordBot.sendMessageChannel(channelId,'message to channel');
+    assert.ok(res, 'sendMessageToAllChannels is ok');
+  });
   it('test sendFile', async () => {
     discordBot.sendFile('../src/test_files/source.gif', channelId, (res) => {assert.ok(res, 'sendFile is ok')})
   });
@@ -36,7 +40,7 @@ describe('discordBot', () => {
   it('test sendGoogleForm', async() => {
     discordBot.sendGoogleForm(googleFormUrl, channelId, (res) => {assert.ok(res, 'sendGoogleForm is ok')});
   })
-  
+
   it('test getChannels', async () => {
     const channels = await discordBot.getChannels();
     assert.ok(channels);
@@ -46,5 +50,14 @@ describe('discordBot', () => {
     const res = await discordBot.sendDirectMessage(discordTestUserId, 'direct message');
     assert.ok(res);
   });
-});
 
+  it('test sendFileToChannel', async () => {
+    const res = await discordBot.sendFileToChannel(channelId, 'https://i.imgur.com/w3duR07.png');
+    assert.ok(res);
+  });
+
+  it('test sendFileToMember', async () => {
+    const res = await discordBot.sendFileToUser(discordTestUserId, 'https://i.imgur.com/w3duR07.png');
+    assert.ok(res);
+  });
+});
