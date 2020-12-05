@@ -1,12 +1,18 @@
 {
-  "name": "@chat_manager_library/chat_manager_library",
+  "name": "chatbot-manager-library",
   "version": "1.0.0",
-  "description": "",
+  "description": "A library that will handle the interaction with two or more EIM platforms via a bot.",
   "main": "chatBotManager.js",
   "scripts": {
     "test": "mocha test/ --recursive --exit --timeout 20000"
   },
-  "author": "",
+  "keywords": [
+    "chatbot",
+    "bot",
+    "libray",
+    "chatmanager"
+  ],
+  "author": "Alfred Garcia, Wilmer Perez, Alleene Lacaba, Xiaoxia Zhang, Brian Chambers",
   "license": "ISC",
   "dependencies": {
     "@slack/events-api": "^2.3.4",
