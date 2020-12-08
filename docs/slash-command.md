@@ -17,3 +17,11 @@
      $ /gm discord ${channel_id} hello 
      $ /gm slack ${channel_id} hello
      ``` 
+   
+3. /pm (private message: send messages directly to a private person): 
+    
+    `/pm ${platform} ${user_id} ${message}`  
+     ```sh
+     $ /pm discord ${user_id} hello world 
+     $ /pm slack ${user_id} hello world
+     ```    

@@ -27,6 +27,18 @@ describe('slackBot', () => {
         })
     })
 
+    it('test sendFileToUser url', () => {
+        slackBot.sendDirectMessage(slackTestUserId, 'https://i.imgur.com/w3duR07.png', (response) => {
+            assert.ok(response, 'sendFile is not working');
+        })
+    })
+
+    it('test sendFileToChannel url', () => {
+        slackBot.sendDirectMessage(slackChannel, 'https://i.imgur.com/w3duR07.png', (response) => {
+            assert.ok(response, 'sendFile is not working');
+        })
+    })
+
     it('test getChannels', async() => {
         const res = await slackBot.getChannels();
         assert.ok(res, 'getChannels is not working');
@@ -34,7 +46,7 @@ describe('slackBot', () => {
 
     it('test getMembers', async () => {
         const members = await slackBot.getMembers();
-        assert.ok(channels);
+        assert.ok(members);
     });
 
     it('test sendDirectMessage', async () => {
