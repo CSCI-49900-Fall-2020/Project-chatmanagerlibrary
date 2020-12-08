@@ -2,6 +2,14 @@ const DiscordBot = require('./discordBot')
 const { SlackBot } = require('./slackBot');
 
 class ChatBotManager {
+
+  /**
+   * @param {Object} option - The chatBotManager configuration option
+   * @param {Object} option.slackBotConfig - slack bot configuration
+   * @param {string} option.slackBotConfig.signingSecret - slack bot signing secret
+   * @param {Object} option.discordBotConfig - discord bot configuration
+   * @param {string} option.discordBotConfig.token - discord bot token
+   */
   constructor(option) {
     const {
       slackBotConfig,
@@ -27,6 +35,11 @@ class ChatBotManager {
     this.option = option;
   }
 
+  /**
+   * Initialize the bot manager and start command listener service
+   * @param {Object} app - The express app object
+   * @returns {Promise[]} An promise object array for bot initialization
+   */
   start(app) {
     const allPromise = [];
 
@@ -59,6 +72,19 @@ class ChatBotManager {
     return allPromise;
   }
 
+  /**
+   * This callback type is called `eventListenerCallback` and is displayed as a global symbol.
+   * @callback eventListenerCallback
+   command, commandArgs, 'discord'
+   * @param {string} command - The command
+   * @param {string[]} commandArgs - The command arguments
+   * @param {string} platform - The chat app platform, eg. slack, discord, telegram
+   */
+
+  /**
+   * Setup the command listener
+   * @param {eventListenerCallback} eventListener - function to handle the message event
+   */
   setupCommandListener(eventListener) {
     if (this.discordBot) {
       this.discordBot.setCommandListener(eventListener);
@@ -69,6 +95,13 @@ class ChatBotManager {
     }
   }
 
+  /**
+   * Send message to all channels at a specific platform
+   * @param {Object} data - The data that's sent to the platform
+   * @param {string} data.platform - The chat app platform, eg. slack, discord, telegram
+   * @param {string} data.message - The sending message
+   * @returns {Promise} Promise of sending message to channel
+   */
   sendMessageToAllChannels(data) {
     const {
       platform,
@@ -92,6 +125,14 @@ class ChatBotManager {
     }
   }
 
+  /**
+   * Send message to a specific channel
+   * @param {Object} data - The data that's sent to the platform
+   * @param {string} data.platform - The chat app platform, eg. slack, discord, telegram
+   * @param {string} data.channelId - The channelId of the channel where the message is sent to
+   * @param {string} data.message - The sending message
+   * @returns {Promise} Promise of sending message to channel
+   */
   sendMessageChannel(data) {
     const {
       platform,
@@ -116,7 +157,10 @@ class ChatBotManager {
     }
   }
 
-  // return all the channels from multiple platforms
+  /**
+   * Get all channels info include channel ids, channel names, and platform, return all the channels from multiple platforms
+   * @returns {Object[]} A channel object array
+   */
   async getChannels() {
     const channels = [];
 
@@ -145,6 +189,10 @@ class ChatBotManager {
     return channels;
   }
 
+  /**
+   * Get all members info include user ids, user names, and platform, return all the members from multiple platforms
+   * @returns {Object[]} An user object array
+   */
   async getMembers() {
     const members = [];
     if (this.slackBot) {
@@ -171,6 +219,14 @@ class ChatBotManager {
     return members;
   }
 
+  /**
+   * Send direct message to private member at a specific platform
+   * @param {Object} data - The data that's sent to the platform
+   * @param {string} data.platform - The chat app platform, eg. slack, discord, telegram
+   * @param {string} data.userId - The users' id
+   * @param {string} data.message - The sending message
+   * @returns {Promise} Promise of sending message to a private user
+   */
   sendDirectMessage(data) {
     const {
       platform,
@@ -195,6 +251,9 @@ class ChatBotManager {
     }
   }
 
+  /**
+   * Stop the bot service
+   */
   stop() {
     if (this.discordBot) {
       this.discordBot.stop();
