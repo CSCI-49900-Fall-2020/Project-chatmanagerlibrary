@@ -15,3 +15,4 @@
 - We would like to extend the chatbot impersonation functionality by giving the library users the ability to configure the commands executable by the users (slash commands).
 - Add/Remove Member
   - add and remove members from groups and/or channels
+  
