@@ -11,7 +11,6 @@ class SlackBot {
         this.slackEvents = createEventAdapter(slackSigningSecret);
         this.slackInteractiveMessages = createMessageAdapter(slackSigningSecret);
         this.webClient = new WebClient(slackBotToken);
-        this.prefix = '~';
       } catch(err){
         console.log(err);
       }
@@ -49,16 +48,6 @@ class SlackBot {
     }
 
     setCommandListener(commandListener) {
-      this.slackEvents.on('message', (message) => {
-        if (message.text.startsWith(this.prefix)) {
-          if (this.onCommandReceived) {
-            const input = message.text.slice(this.prefix.length).trim().split(' ');
-            const command = input.shift();
-            const commandArgs = input.join(' ');
-            this.onCommandReceived(command, commandArgs, 'slack');
-          }
-        }
-      });
       this.onCommandReceived = commandListener;
     }
 

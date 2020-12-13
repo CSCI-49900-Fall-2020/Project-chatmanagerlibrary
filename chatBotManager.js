@@ -7,14 +7,23 @@ class ChatBotManager {
    * @param {Object} option - The chatBotManager configuration option
    * @param {Object} option.slackBotConfig - slack bot configuration
    * @param {string} option.slackBotConfig.signingSecret - slack bot signing secret
+   * @param {string} option.slackBotConfig.slashCommandPath - slack slash express middleware path
    * @param {Object} option.discordBotConfig - discord bot configuration
    * @param {string} option.discordBotConfig.token - discord bot token
+   * @param {Object} option.commandConfig - command configuration
+   * @param {Object} option.commandConfig.privateMessage - private message command
+   * @param {Object} option.commandConfig.groupMessage - group message command
+   * @param {Object} option.commandConfig.sendFile - send file command
+   * @param {Object} option.commandConfig.help - help command
+   * @param {Object} option.commandConfig.list - list command
    */
   constructor(option) {
     const {
       slackBotConfig,
       discordBotConfig,
     } = option;
+
+    this.commandListener = {}
 
     // check if we have slack config
     if (slackBotConfig) {
@@ -41,6 +50,14 @@ class ChatBotManager {
    * @returns {Promise[]} An promise object array for bot initialization
    */
   start(app) {
+    const commandConfig = this.option.commandConfig || {
+      directMessage: "pm",
+      groupMessage: "gm",
+      sendFile: "file",
+      help: "help",
+      list: "ls",
+    }
+
     const allPromise = [];
 
     if (this.discordBot) {
@@ -52,21 +69,93 @@ class ChatBotManager {
       const {
         eventPort,
         interactiveMessagePort,
-        slackEventAPIPath,
-        slackSlashCommandPath,
       } = this.option.slackBotConfig;
 
       // create an slack app if there's no existing app running
       if (app) {
-        if (slackSlashCommandPath == null) {
-          throw 'slackSlashCommandPath is not provided for slack command slash listener'
-        }
-
-        app.use('/slack-command', this.slackBot.getSlashCommandListener());
+        // use '/slack-command' as slash command path by default
+        const slackSlashCommandPath = this.option.slackBotConfig.slashCommandPath || 'slack-command'
+        app.use(`/${slackSlashCommandPath}`, this.slackBot.getSlashCommandListener());
       } else {
         const res = this.slackBot.start(eventPort, interactiveMessagePort);  
         allPromise.push(res);
       }
+    }
+
+    // command: the command sent by the user
+    // commandArgs: the command arguments sent by the user
+    // source: where the command sent to
+    const onCommandReceived = async (command, commandArgs, source) => {
+      if (command === commandConfig.directMessage) {
+        const tmp = commandArgs.split(' ');
+        const platform = tmp.shift();
+        const userId = tmp.shift();
+        const message = tmp.join(' ');
+        const data = {
+          platform,
+          userId,
+          message,
+          source,
+        };
+
+        await this.sendDirectMessage(data);
+        return {
+          "result": "message sent",
+        };
+      } else if (command === commandConfig.groupMessage) {
+        const tmp = commandArgs.split(' ');
+        const platform = tmp.shift();
+        const channelId = tmp.shift();
+        const message = tmp.join(' ');
+        const data = {
+          platform,
+          channelId,
+          message,
+          source,
+        };
+
+        await this.sendMessageChannel(data);
+        return {
+          "result": "message sent",
+        };
+      } else if (command === commandConfig.list) {
+        const tmp = commandArgs.split(' ');
+        const lsType = tmp.shift();
+        const platform = tmp.shift();
+        if (lsType === 'channel') {
+          const allChannels = await this.getChannels();
+          if (platform) {
+            return allChannels.filter(ch => ch.platform === platform);
+          }
+
+          return allChannels;
+        } if (lsType === 'member') {
+          const allMembers = await this.getMembers();
+          if (platform) {
+            return allMembers.filter(m => m.platform === platform);
+          }
+
+          return allMembers;
+        }
+      }
+
+      if (command in this.commandListener) {
+        if (this.commandListener[command]) {
+          // listener for user who would like to subscribe the command event
+          return this.commandListener[command](command, commandArgs, platform);
+        }
+      } else {
+        throw `command: ${command} doesn't exist !`
+      }
+
+    }
+
+    if (this.discordBot) {
+      this.discordBot.setCommandListener(onCommandReceived);
+    }
+
+    if (this.slackBot) {
+      this.slackBot.setCommandListener(onCommandReceived);
     }
 
     return allPromise;
@@ -82,17 +171,12 @@ class ChatBotManager {
    */
 
   /**
-   * Setup the command listener
+   * Setup the command listener for a specific command
+   * @param {command} command - the command to subscribe to
    * @param {eventListenerCallback} eventListener - function to handle the message event
    */
-  setupCommandListener(eventListener) {
-    if (this.discordBot) {
-      this.discordBot.setCommandListener(eventListener);
-    }
-
-    if (this.slackBot) {
-      this.slackBot.setCommandListener(eventListener);
-    }
+  setupCommandListener(command, eventListener) {
+    this.commandListener[command] = eventListener;
   }
 
   /**
