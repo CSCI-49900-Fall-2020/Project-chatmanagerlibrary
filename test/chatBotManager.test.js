@@ -15,6 +15,9 @@ const option = {
   discordBotConfig: {
     token: process.env.DISCORD_BOT_TOKEN,
   },
+  telegramBotConfig: {
+    telegramToken: process.env.TELEGRAM_TOKEN
+  }
 };
 
 const chatBotManager = new ChatBotManager(option);
@@ -34,6 +37,10 @@ describe('chatBotManager', () => {
 
   it('test slack bot config', () => {
     assert.ok(chatBotManager.slackBot, 'slackBot is configured');
+  });
+
+  it('test telegram bot config', () => {
+    assert.ok(chatBotManager.telegramBot, 'telegramBot is configured');
   });
 
   it('test discord', (done) => {

@@ -1,11 +1,13 @@
 const DiscordBot = require('./discordBot')
-const { SlackBot } = require('./slackBot');
+const { SlackBot } = require('./slackBot')
+const TelegramBot = require('./telegramBot')
 
 class ChatBotManager {
   constructor(option) {
     const {
       slackBotConfig,
       discordBotConfig,
+      telegramBotConfig
     } = option;
 
     // check if we have slack config
@@ -24,6 +26,15 @@ class ChatBotManager {
       } = discordBotConfig;
       this.discordBot = new DiscordBot(discordToken);
     }
+
+    // check if we have telegram config
+    if(telegramBotConfig){
+      const{
+        teleToken: telegramToken
+      } = telegramBotConfig;
+      this.telegramBot = new TelegramBot(teleToken);
+    }
+
     this.option = option;
   }
 
@@ -56,6 +67,11 @@ class ChatBotManager {
       }
     }
 
+    if (this.telegramBot) {
+      const res = this.telegramBot.start();
+      allPromise.push(res);
+    }
+
     return allPromise;
   }
 
@@ -66,6 +82,10 @@ class ChatBotManager {
 
     if (this.slackBot) {
       this.slackBot.setCommandListener(eventListener);
+    }
+
+    if (this.telegramBot)  {
+      this.telegramBot.setCommandListener(eventListener);
     }
   }
 
@@ -86,6 +106,12 @@ class ChatBotManager {
         return this.discordBot.sendMessageToAllChannels(message);
       } else {
         throw 'discord bot is not configured';
+      }
+    } else if (platform === 'telegram') {
+      if (this.telegramBot) {
+        return this.telegramBot.sendMessageToAllChannels(message);
+      } else {
+        throw 'telegram bot is not configured';
       }
     } else {
       throw `platform ${platform} bot is not configured`;
@@ -110,6 +136,12 @@ class ChatBotManager {
         return this.discordBot.sendMessageChannel(channelId, message);
       } else {
         throw 'discord bot is not configured';
+      }
+    } else if (platform === 'telegram') {
+      if (this.telegramBot) {
+        return this.telegramBot.sendMessageToAllChannels(message);
+      } else {
+        throw 'telegram bot is not configured';
       }
     } else {
       throw `platform ${platform} bot is not configured`;
@@ -142,6 +174,14 @@ class ChatBotManager {
       }
     }
 
+    if (this.telegramBot) {
+      const telegramChannel = this.telegramBot.getChannels();
+      channels.push({
+        id: telegramChannel.chatID,
+        name: telegramChannel.chatTitle
+      })
+    }
+
     return channels;
   }
 
@@ -168,6 +208,7 @@ class ChatBotManager {
         })
       }
     }
+
     return members;
   }
 
