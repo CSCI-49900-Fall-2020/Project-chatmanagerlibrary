@@ -178,7 +178,8 @@ class ChatBotManager {
       const telegramChannel = this.telegramBot.getChannels();
       channels.push({
         id: telegramChannel.chatID,
-        name: telegramChannel.chatTitle
+        name: telegramChannel.chatTitle,
+        platform: 'telegram'
       })
     }
 

@@ -16,7 +16,7 @@ const option = {
     token: process.env.DISCORD_BOT_TOKEN,
   },
   telegramBotConfig: {
-    telegramToken: process.env.TELEGRAM_TOKEN
+    telegramToken: process.env.TELEGRAM_BOT_TOKEN
   }
 };
 

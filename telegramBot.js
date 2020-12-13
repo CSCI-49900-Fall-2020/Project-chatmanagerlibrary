@@ -71,7 +71,7 @@ class TelegramBot {
             }
         })
         
-        this.bot.command('fs', async (ctx) => {
+        this.bot.command('fs_l', async (ctx) => {
             if(this.initialzied)  {
                 if(this.onCommandReceived){
                     const input = ctx.message.text.slice(1).trim().split(' ');
@@ -82,8 +82,8 @@ class TelegramBot {
                     return result;
                 }
             
-                const fileURL = "http://i.imgur.com/5rOhtdL.png"
-                this.sendFile(fileURL)
+                const filePath = "test.jpeg"
+                this.sendFileLocal(filePath)
             } else {
                 ctx.reply('Bot uninitialized. Run /init command to initialize.')
             }
@@ -105,6 +105,12 @@ class TelegramBot {
             } else {
                 ctx.reply('Bot uninitialized. Run /init command to initialize.')
             }
+        })
+
+        this.bot.command('test', (ctx) => {
+            
+            console.log(JSON.stringify(ctx, null, 2))
+
         })
 
         this.bot.use((ctx) => {
@@ -148,48 +154,25 @@ class TelegramBot {
     }
 
     async sendFileLocal(filePath){
-        
-        console.log(`${this.baseURL}sendPhoto`)
-
         if(this.initialzied){
-
-            var photoURL = fileURL;
-            var formData = {
-                chat_id: this.chatID,
-                photo: await request(photoURL)
-            };
-
-            console.log(photo)
-
-            const response = await axios.post({
-                url: JSON.stringify(`${this.fileURL}sendPhoto`),
-                formData: formData
-            });
-
-            console.log(response)
+            const response = await this.bot.telegram.sendDocument(this.chatID, filePath)
+            return response
         } else {
-            console.log('Chat Uninitialized')
+            console.log('Chat Uninitialized. Run the /init command in the Telegram Client to initialize')
         }
     }
 
     async sendFileRemote(fileURL){
         if(this.initialzied){
-            try{
-                return this.bot.telegram.sendDocument(this.chatID, fileURL);
-            } catch (err) {
-                console.log(err)
-            }
+            const response = await this.bot.telegram.sendDocument(this.chatID, fileURL);
+            return response
         } else {
-            console.log('Chat Uninitialized')
+            console.log('Chat Uninitialized. Run the /init command in the Telegram Client to initialize')
         }
     }
 
     start(){
-        try{
-            this.bot.launch();
-        } catch(err) {
-            console.log(err)
-        }
+        return this.bot.launch();
     }
 
     quit(){
