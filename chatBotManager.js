@@ -84,13 +84,13 @@ class ChatBotManager {
 
     // command: the command sent by the user
     // commandArgs: the command arguments sent by the user
-    // source: where the command sent to
+    // sender: where the command sent from
     const onCommandReceived = async (command, commandArgs, sender) => {
       if (command === commandConfig.directMessage) {
         const tmp = commandArgs.split(' ');
         const platform = tmp.shift();
         const userId = tmp.shift();
-        const message = tmp.join(' ');
+        const message = tmp.join(' ')  + ` (sent from ${sender.userName} on ${sender.platform})`;
         const data = {
           platform,
           userId,
@@ -106,7 +106,7 @@ class ChatBotManager {
         const tmp = commandArgs.split(' ');
         const platform = tmp.shift();
         const channelId = tmp.shift();
-        const message = tmp.join(' ');
+        const message = tmp.join(' ') + `(sent from ${sender.username} on ${sender.platform})`;
         const data = {
           platform,
           channelId,
@@ -166,17 +166,45 @@ class ChatBotManager {
    command, commandArgs, 'discord'
    * @param {string} command - The command
    * @param {string[]} commandArgs - The command arguments
-   * @param {string} platform - The chat app platform, eg. slack, discord, telegram
+   * @param {Object} sender - Who sent the command
+   * @param {Object} sender.userId - The userId of the sender
+   * @param {Object} sender.userName - The userName of the sender
+   * @param {Object} sender.platform - The platform of the sender
    * @return {Promise}
    */
 
   /**
    * Setup the command listener for a specific command
    * @param {command} command - the command to subscribe to
-   * @param {eventListenerCallback} eventListener - function to handle the message event
+   * @param {eventListenerCallback} eventListener - function to handle the command event
    */
   setupCommandListener(command, eventListener) {
     this.commandListener[command] = eventListener;
+  }
+
+  /**
+   * This callback type is called `messageListener` and is displayed as a global symbol.
+   * @callback messageListenerCallback
+   * @param {string} message - The message content
+   * @param {Object} sender - Who sent the message
+   * @param {Object} sender.userId - The userId of the sender
+   * @param {Object} sender.userName - The userName of the sender
+   * @param {Object} sender.platform - The platform of the sender
+   * @return {Promise}
+   */
+
+  /**
+   * Set message listener
+   * @param {messageListenerCallback} messageListener - function to handle the message event
+   */
+  setMessageListener(messageListener) {
+    if (this.slackBot) {
+      this.slackBot.setMessageListener(messageListener);
+    }
+
+    if (this.discordBot) {
+      this.discordBot.setMessageListener(messageListener);
+    }
   }
 
   /**

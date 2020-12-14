@@ -46,6 +46,7 @@ class SlackBot {
                     userName: req.body.user_name,
                     platform: 'slack'
                 };
+
                 const result = await this.onCommandReceived(command, commandArgs, sender);
                 res.json(result);
             }
@@ -54,6 +55,10 @@ class SlackBot {
 
     setCommandListener(commandListener) {
       this.onCommandReceived = commandListener;
+    }
+
+    setMessageListener(messageListener) {
+        this.onMessageReceived = messageListener;
     }
 
     // listens for when users submit forms, it takes the modal callback id as an input. use this after sending a form to get user responses
