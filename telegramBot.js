@@ -1,32 +1,14 @@
 const fs = require('fs')
 const axios = require('axios')
-const request = require('request')
 const { Telegraf } = require('telegraf')
-const { createVerify } = require('crypto')
 
 class TelegramBot {
     constructor( teleToken ){
-
-        //URLs for http requests
+        //URL for http requests
         this.baseURL = `https://api.telegram.org/bot${teleToken}/`
         
         this.bot = new Telegraf(teleToken);
 
-        this.initialzied = false;
-
-        this.bot.command('help', (ctx) =>{
-            const helpText = `You can control me by sending these commands:\n
-                                \t/gm <platform> <message> - sends text message to chosen platform\n
-                                \t/ls <platform> - lists members of all channels of chosen platform\n
-                                \t/file <platform> <file> - sends file to provided platform\n`
-
-            ctx.reply(helpText)
-        })
-
-        this.bot.command('quit', (ctx) => {
-            ctx.leaveChat()
-        })
-        
         this.bot.command('gm', async (ctx) => {
             this.sync(ctx)
 
@@ -39,79 +21,37 @@ class TelegramBot {
                 return result;
             }
         })
+
+        this.bot.command('help', (ctx) =>{
+            const helpText = `You can control me by sending these commands:\n
+                                \t/gm <platform> <message> - sends text message to chosen platform\n
+                                \t/ls <platform> - lists members of all channels of chosen platform\n
+                                \t/file <platform> - sends file to provided platform\n`
+
+            ctx.reply(helpText)
+        })
+
+        this.bot.command('quit', (ctx) => {
+            ctx.leaveChat()
+        })
         
-        this.bot.command('fs_l', async (ctx) => {
-            this.sync()
-
-            if(this.initialzied)  {
-                if(this.onCommandReceived){
-                    const input = ctx.message.text.slice(1).trim().split(' ');
-                    const command = input.shift();
-                    const commandArgs = input.join(' ');
-                    const result = await this.onCommandReceived(command, commandArgs, 'telegram');
-                    console.log(result);
-                    return result;
-                }
-            
-                const filePath = "test.jpeg"
-                this.sendFileLocal(filePath)
-            } else {
-                ctx.reply('Bot uninitialized. Run /init command to initialize.')
-            }
-        })
-
-        this.bot.command('fs_r', async (ctx) =>{
-            this.sync()
-
-            if(this.initialzied)  {
-                if(this.onCommandReceived){
-                    const input = ctx.message.text.slice(1).trim().split(' ');
-                    const command = input.shift();
-                    const commandArgs = input.join(' ');
-                    const result = await this.onCommandReceived(command, commandArgs, 'telegram');
-                    console.log(result);
-                    return result;
-                }
-            
-                const fileURL = 'https://homepages.cae.wisc.edu/~ece533/images/airplane.png'
-                this.sendFileRemote(fileURL)
-            } else {
-                ctx.reply('Bot uninitialized. Run /init command to initialize.')
-            }
-        })
-
         //This listens for messages containing files and triggers the file sharing function if necessary
         this.bot.use( async (ctx) => {
             this.sync(ctx)
 
             const update = ctx.update.message;
             
-            console.log('UPDATE:\n' + JSON.stringify(ctx.update, null, 2))
-
             //Check if update object contains a photo, video or document file
             //Check if update object contains a caption and caption entities to see if there is a command
-            if( (update.video || update.photo || update.document) && ((update.caption) && (update.caption_entities)) ){
+            if( (update.video || update.photo || update.document) && (update.caption && update.caption_entities) ){
+                //check if file was captioned with a bot command
                 if(update.caption_entities[0].type == "bot_command"){
                     const caption = update.caption
-
-                    // if(this.onCommandReceived){
-                    //     const input = caption.slice(1).trim().split(' ');
-                    //     const command = input.shift();
-                    //     const commandArgs = input.join(' ');
-                    //     const result = await this.onCommandReceived(command, commandArgs, 'telegram');
-                    //     console.log(result);
-                    //     return result;
-                    // }
-
+                    //filePath will be passed to onCommandReceived
+                    const filePath;
                     if(update.video){
-
-                        console.log('VIDEO: ')
-
-                        const files = update.video
-                        const fileID = update.video.file_id
-
-                        console.log('Files: ' + JSON.stringify(files, null, 2))
-                        console.log('FileID: ' + fileID)
+                        const file = update.video
+                        const fileID = file.file_id
 
                         ctx.telegram.getFileLink(fileID).then(url => { 
                             axios({url, responseType: 'stream'}).then(response => {
@@ -122,59 +62,51 @@ class TelegramBot {
                                 });
                             })
                         })
-
                     } else if(update.photo){
-                        
-                        console.log('PHOTO: ')
-
                         const files = update.photo
                         const fileID = files[1].file_id
                         
-                        console.log('Files: ' + JSON.stringify(files, null, 2))
-                        console.log('FileID: ' + fileID)
-
                         ctx.telegram.getFileLink(fileID).then(url => { 
                             axios({url, responseType: 'stream'}).then(response => {
                                 return new Promise((resolve, reject) => {
                                     response.data.pipe(fs.createWriteStream(`${ctx.update.message.from.id}_${ctx.update.message.message_id}.jpg`))
-                                        .on('finish', () => {console.log('Successful download')})
+                                        .on('finish', () => {console.log('Successful Photo download')})
                                         .on('error', e => {console.log(e)})
                                 });
                             })
                         })
-                    
                     } else if(update.document){
-
-                        console.log('DOCUMENT: ')
-
                         const file = update.document
                         const fileID = file.file_id
-
-                        console.log('File: ' + JSON.stringify(file, null, 2))
-                        console.log('FileID: ' + fileID)
 
                         ctx.telegram.getFileLink(fileID).then(url => { 
                             axios({url, responseType: 'stream'}).then(response => {
                                 return new Promise((resolve, reject) => {
                                     response.data.pipe(fs.createWriteStream(`${ctx.update.message.from.id}_${ctx.update.message.message_id}.pdf`))
-                                        .on('finish', () => {console.log('Successful download')})
+                                        .on('finish', () => {console.log('Successful Document download')})
                                         .on('error', e => {console.log(e)})
                                 });
                             })
                         })
-    
                     }
-                }
+
+                    if(this.onCommandReceived){
+                        const input = caption.slice(1).trim().split(' ');
+                        const command = input.shift();
+                        const commandArgs = input.join(' ');
+                        const result = await this.onCommandReceived(command, commandArgs, 'telegram');
+                        console.log(result);
+                        return result;
+                    }
+                } 
             }   
         })
-
     }
 
     //Syncs the bot with the current chat
     sync(ctx) {
         this.chatID = ctx.chat.id
         this.chatTitle = ctx.chat.title
-        this.initialzied = true;
     }
 
     setCommandListener(commandListener) {
@@ -197,8 +129,8 @@ class TelegramBot {
         }
     }
 
-    async sendFile(file){
-        const response = await this.bot.telegram.sendDocument(this.chatID, file)
+    async sendFile(filePath){
+        const response = await this.bot.telegram.sendDocument(this.chatID, filePath)
         return response
     }
 
