@@ -48,7 +48,7 @@ class TelegramBot {
                 if(update.caption_entities[0].type == "bot_command"){
                     const caption = update.caption
                     //filePath will be passed to onCommandReceived
-                    const filePath;
+                    const filePath = null;
                     if(update.video){
                         const file = update.video
                         const fileID = file.file_id
