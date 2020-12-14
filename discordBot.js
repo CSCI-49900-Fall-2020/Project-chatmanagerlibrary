@@ -23,7 +23,12 @@ class DiscordBot {
           const input = message.content.slice(this.prefix.length).trim().split(' ');
           const command = input.shift();
           const commandArgs = input.join(' ');
-          const result = await this.onCommandReceived(command, commandArgs, 'discord');
+          const sender = {
+            userId: message.author.id,
+            userName: message.author.username,
+            platform: 'discord'
+          };
+          const result = await this.onCommandReceived(command, commandArgs, sender);
           return message.reply(JSON.stringify(result));
         }
       }

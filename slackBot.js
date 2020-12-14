@@ -41,7 +41,12 @@ class SlackBot {
             if (this.onCommandReceived) {
                 const commandArgs = req.body.text;
                 const command = req.body.command.substring(1);
-                const result = await this.onCommandReceived(command, commandArgs, 'slack');
+                const sender = {
+                    userId: req.body.user_id,
+                    userName: req.body.user_name,
+                    platform: 'slack'
+                };
+                const result = await this.onCommandReceived(command, commandArgs, sender);
                 res.json(result);
             }
         }

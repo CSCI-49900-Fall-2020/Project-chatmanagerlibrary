@@ -51,11 +51,11 @@ class ChatBotManager {
    */
   start(app) {
     const commandConfig = this.option.commandConfig || {
-      directMessage: "pm",
-      groupMessage: "gm",
-      sendFile: "file",
-      help: "help",
-      list: "ls",
+      directMessage: 'pm',
+      groupMessage: 'gm',
+      sendFile: 'file',
+      help: 'help',
+      list: 'ls',
     }
 
     const allPromise = [];
@@ -85,7 +85,7 @@ class ChatBotManager {
     // command: the command sent by the user
     // commandArgs: the command arguments sent by the user
     // source: where the command sent to
-    const onCommandReceived = async (command, commandArgs, source) => {
+    const onCommandReceived = async (command, commandArgs, sender) => {
       if (command === commandConfig.directMessage) {
         const tmp = commandArgs.split(' ');
         const platform = tmp.shift();
@@ -95,7 +95,7 @@ class ChatBotManager {
           platform,
           userId,
           message,
-          source,
+          sender,
         };
 
         await this.sendDirectMessage(data);
@@ -111,7 +111,7 @@ class ChatBotManager {
           platform,
           channelId,
           message,
-          source,
+          sender,
         };
 
         await this.sendMessageChannel(data);
@@ -142,12 +142,11 @@ class ChatBotManager {
       if (command in this.commandListener) {
         if (this.commandListener[command]) {
           // listener for user who would like to subscribe the command event
-          return this.commandListener[command](command, commandArgs, platform);
+          return this.commandListener[command](command, commandArgs, sender);
         }
       } else {
         throw `command: ${command} doesn't exist !`
       }
-
     }
 
     if (this.discordBot) {
@@ -168,6 +167,7 @@ class ChatBotManager {
    * @param {string} command - The command
    * @param {string[]} commandArgs - The command arguments
    * @param {string} platform - The chat app platform, eg. slack, discord, telegram
+   * @return {Promise}
    */
 
   /**
