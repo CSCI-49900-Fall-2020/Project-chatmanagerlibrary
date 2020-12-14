@@ -2,6 +2,7 @@ const fs = require('fs')
 const axios = require('axios')
 const request = require('request')
 const { Telegraf } = require('telegraf')
+const { createVerify } = require('crypto')
 
 class TelegramBot {
     constructor( teleToken ){
@@ -85,35 +86,82 @@ class TelegramBot {
 
             const update = ctx.update.message;
             
-            console.log(JSON.stringify(update, null, 2))
+            console.log('UPDATE:\n' + JSON.stringify(ctx.update, null, 2))
 
             //Check if update object contains a photo, video or document file
             //Check if update object contains a caption and caption entities to see if there is a command
             if( (update.video || update.photo || update.document) && ((update.caption) && (update.caption_entities)) ){
-                if(update.caption_entities.type === "bot_command"){
+                if(update.caption_entities[0].type == "bot_command"){
                     const caption = update.caption
 
-                    if(this.onCommandReceived){
-                        const input = caption.slice(1).trim().split(' ');
-                        const command = input.shift();
-                        const commandArgs = input.join(' ');
-                        const result = await this.onCommandReceived(command, commandArgs, 'telegram');
-                        console.log(result);
-                        return result;
-                    }
+                    // if(this.onCommandReceived){
+                    //     const input = caption.slice(1).trim().split(' ');
+                    //     const command = input.shift();
+                    //     const commandArgs = input.join(' ');
+                    //     const result = await this.onCommandReceived(command, commandArgs, 'telegram');
+                    //     console.log(result);
+                    //     return result;
+                    // }
 
                     if(update.video){
-                    console.log('VIDEO: ')
-                    console.log(JSON.stringify(update, null, 2)) 
-                    } else if(update.photo){
-                    console.log('PHOTO: ')
 
-                    const photo = update.photo
-                    console.log(JSON.stringify(update, null, 2))
-    
+                        console.log('VIDEO: ')
+
+                        const files = update.video
+                        const fileID = update.video.file_id
+
+                        console.log('Files: ' + JSON.stringify(files, null, 2))
+                        console.log('FileID: ' + fileID)
+
+                        ctx.telegram.getFileLink(fileID).then(url => { 
+                            axios({url, responseType: 'stream'}).then(response => {
+                                return new Promise((resolve, reject) => {
+                                    response.data.pipe(fs.createWriteStream(`${ctx.update.message.from.id}_${ctx.update.message.message_id}.mp4`))
+                                        .on('finish', () => {console.log('Successful Video download')})
+                                        .on('error', e => {console.log(e)})
+                                });
+                            })
+                        })
+
+                    } else if(update.photo){
+                        
+                        console.log('PHOTO: ')
+
+                        const files = update.photo
+                        const fileID = files[1].file_id
+                        
+                        console.log('Files: ' + JSON.stringify(files, null, 2))
+                        console.log('FileID: ' + fileID)
+
+                        ctx.telegram.getFileLink(fileID).then(url => { 
+                            axios({url, responseType: 'stream'}).then(response => {
+                                return new Promise((resolve, reject) => {
+                                    response.data.pipe(fs.createWriteStream(`${ctx.update.message.from.id}_${ctx.update.message.message_id}.jpg`))
+                                        .on('finish', () => {console.log('Successful download')})
+                                        .on('error', e => {console.log(e)})
+                                });
+                            })
+                        })
+                    
                     } else if(update.document){
-                    console.log('DOCUMENT: ')
-                    console.log(JSON.stringify(update, null, 2))
+
+                        console.log('DOCUMENT: ')
+
+                        const file = update.document
+                        const fileID = file.file_id
+
+                        console.log('File: ' + JSON.stringify(file, null, 2))
+                        console.log('FileID: ' + fileID)
+
+                        ctx.telegram.getFileLink(fileID).then(url => { 
+                            axios({url, responseType: 'stream'}).then(response => {
+                                return new Promise((resolve, reject) => {
+                                    response.data.pipe(fs.createWriteStream(`${ctx.update.message.from.id}_${ctx.update.message.message_id}.pdf`))
+                                        .on('finish', () => {console.log('Successful download')})
+                                        .on('error', e => {console.log(e)})
+                                });
+                            })
+                        })
     
                     }
                 }
@@ -153,15 +201,6 @@ class TelegramBot {
         const response = await this.bot.telegram.sendDocument(this.chatID, file)
         return response
     }
-
-    // async sendFileRemote(fileURL){
-    //     if(this.initialzied){
-    //         const response = await this.bot.telegram.sendDocument(this.chatID, fileURL);
-    //         return response
-    //     } else {
-    //         console.log('Chat Uninitialized. Run the /init command in the Telegram Client to initialize')
-    //     }
-    // }
 
     start(){
         return this.bot.launch();
