@@ -15,16 +15,30 @@ class DiscordBot {
     this.onCommandReceived = commandListener;
   }
 
+  setMessageListener(messageListener) {
+    this.onMessageReceived = messageListener;
+  }
+
   start() {
     const client = this.client;
     client.on('message', async (message) => {
+      const sender = {
+        userId: message.author.id,
+        userName: message.author.username,
+        platform: 'discord'
+      };
+
       if (message.content.startsWith(this.prefix)) {
         if (this.onCommandReceived) {
           const input = message.content.slice(this.prefix.length).trim().split(' ');
           const command = input.shift();
           const commandArgs = input.join(' ');
-          const result = await this.onCommandReceived(command, commandArgs, 'discord');
+          const result = await this.onCommandReceived(command, commandArgs, sender);
           return message.reply(JSON.stringify(result));
+        }
+      } else {
+        if (this.onMessageReceived) {
+          this.onMessageReceived(message.content, sender);
         }
       }
     });
