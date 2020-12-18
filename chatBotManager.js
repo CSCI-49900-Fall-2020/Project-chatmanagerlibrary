@@ -8,6 +8,7 @@ class ChatBotManager {
    * @param {Object} option.slackBotConfig - slack bot configuration
    * @param {string} option.slackBotConfig.signingSecret - slack bot signing secret
    * @param {string} option.slackBotConfig.slashCommandPath - slack slash express middleware path
+   * @param {string} option.slackBotConfig.slackEventPath - slack slash express middleware path
    * @param {Object} option.discordBotConfig - discord bot configuration
    * @param {string} option.discordBotConfig.token - discord bot token
    * @param {Object} option.commandConfig - command configuration
@@ -44,6 +45,13 @@ class ChatBotManager {
     this.option = option;
   }
 
+  configure(app) {
+    if (app) {
+      const slackSlashCommandPath = this.option.slackBotConfig.slashCommandPath || 'slack-command';
+      app.use(`/${slackSlashCommandPath}`, this.slackBot.getSlashCommandListener());
+    }
+  }
+
   /**
    * Initialize the bot manager and start command listener service
    * @param {Object} app - The express app object
@@ -74,10 +82,12 @@ class ChatBotManager {
       // create an slack app if there's no existing app running
       if (app) {
         // use '/slack-command' as slash command path by default
-        const slackSlashCommandPath = this.option.slackBotConfig.slashCommandPath || 'slack-command'
-        app.use(`/${slackSlashCommandPath}`, this.slackBot.getSlashCommandListener());
+        const slackEventPath = this.option.slackBotConfig.slackEventPath || 'slack-event';
+        app.use(`/${slackEventPath}`, this.slackBot.requestMessageListener());
+        const res = this.slackBot.start();
+        allPromise.push(res);
       } else {
-        const res = this.slackBot.start(eventPort, interactiveMessagePort);  
+        const res = this.slackBot.start(eventPort, interactiveMessagePort);
         allPromise.push(res);
       }
     }
