@@ -4,6 +4,7 @@ const { Telegraf } = require('telegraf')
 
 class TelegramBot {
     constructor( teleToken ){
+
         //URL for http requests
         this.baseURL = `https://api.telegram.org/bot${teleToken}/`
         
@@ -11,6 +12,8 @@ class TelegramBot {
 
         this.bot.command('gm', async (ctx) => {
             this.sync(ctx)
+            
+            this.sendFile(ctx)
 
             if(this.onCommandReceived){
                 const input = ctx.message.text.slice(1).trim().split(' ');
@@ -47,11 +50,10 @@ class TelegramBot {
                 //check if file was captioned with a bot command
                 if(update.caption_entities[0].type == "bot_command"){
                     const caption = update.caption
-                    //filePath will be passed to onCommandReceived
                     const filePath = null;
                     if(update.video){
-                        const file = update.video
-                        const fileID = file.file_id
+                        const files = update.video
+                        const fileID = update.video.file_id
 
                         ctx.telegram.getFileLink(fileID).then(url => { 
                             axios({url, responseType: 'stream'}).then(response => {
@@ -63,6 +65,7 @@ class TelegramBot {
                             })
                         })
                     } else if(update.photo){
+                        
                         const files = update.photo
                         const fileID = files[1].file_id
                         
@@ -76,6 +79,7 @@ class TelegramBot {
                             })
                         })
                     } else if(update.document){
+
                         const file = update.document
                         const fileID = file.file_id
 
@@ -90,14 +94,14 @@ class TelegramBot {
                         })
                     }
 
-                    if(this.onCommandReceived){
-                        const input = caption.slice(1).trim().split(' ');
-                        const command = input.shift();
-                        const commandArgs = input.join(' ');
-                        const result = await this.onCommandReceived(command, commandArgs, 'telegram');
-                        console.log(result);
-                        return result;
-                    }
+                    // if(this.onCommandReceived){
+                    //     const input = caption.slice(1).trim().split(' ');
+                    //     const command = input.shift();
+                    //     const commandArgs = input.join(' ');
+                    //     const result = await this.onCommandReceived(command, commandArgs, 'telegram');
+                    //     console.log(result);
+                    //     return result;
+                    // }
                 } 
             }   
         })
@@ -130,7 +134,8 @@ class TelegramBot {
     }
 
     async sendFile(filePath){
-        const response = await this.bot.telegram.sendDocument(this.chatID, filePath)
+        const file = '/test.jpeg'
+        const response = await this.bot.telegram.sendDocument(this.chatID, file)
         return response
     }
 
