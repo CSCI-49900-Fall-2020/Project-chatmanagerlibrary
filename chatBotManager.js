@@ -1,5 +1,6 @@
 const DiscordBot = require('./discordBot')
-const { SlackBot } = require('./slackBot');
+const { SlackBot } = require('./slackBot')
+const TelegramBot = require('./telegramBot')
 
 class ChatBotManager {
 
@@ -21,6 +22,7 @@ class ChatBotManager {
     const {
       slackBotConfig,
       discordBotConfig,
+      telegramBotConfig
     } = option;
 
     this.commandListener = {}
@@ -41,6 +43,15 @@ class ChatBotManager {
       } = discordBotConfig;
       this.discordBot = new DiscordBot(discordToken);
     }
+
+    // check if we have telegram config
+    if(telegramBotConfig){
+      const{
+        teleToken: telegramToken
+      } = telegramBotConfig;
+      this.telegramBot = new TelegramBot(teleToken);
+    }
+
     this.option = option;
   }
 
@@ -80,6 +91,15 @@ class ChatBotManager {
         const res = this.slackBot.start(eventPort, interactiveMessagePort);  
         allPromise.push(res);
       }
+    }
+
+
+    if (this.telegramBot) {
+        const res = this.telegramBot.start();
+        allPromise.push(res);
+      }
+
+      return allPromise;
     }
 
     // command: the command sent by the user
@@ -149,6 +169,7 @@ class ChatBotManager {
       }
     }
 
+
     if (this.discordBot) {
       this.discordBot.setCommandListener(onCommandReceived);
     }
@@ -205,6 +226,10 @@ class ChatBotManager {
     if (this.discordBot) {
       this.discordBot.setMessageListener(messageListener);
     }
+
+    if (this.telegramBot)  {
+      this.telegramBot.setCommandListener(eventListener);
+    }
   }
 
   /**
@@ -231,6 +256,12 @@ class ChatBotManager {
         return this.discordBot.sendMessageToAllChannels(message);
       } else {
         throw 'discord bot is not configured';
+      }
+    } else if (platform === 'telegram') {
+      if (this.telegramBot) {
+        return this.telegramBot.sendMessageToAllChannels(message);
+      } else {
+        throw 'telegram bot is not configured';
       }
     } else {
       throw `platform ${platform} bot is not configured`;
@@ -263,6 +294,12 @@ class ChatBotManager {
         return this.discordBot.sendMessageChannel(channelId, message);
       } else {
         throw 'discord bot is not configured';
+      }
+    } else if (platform === 'telegram') {
+      if (this.telegramBot) {
+        return this.telegramBot.sendMessageToAllChannels(message);
+      } else {
+        throw 'telegram bot is not configured';
       }
     } else {
       throw `platform ${platform} bot is not configured`;
@@ -298,6 +335,15 @@ class ChatBotManager {
       }
     }
 
+    if (this.telegramBot) {
+      const telegramChannel = this.telegramBot.getChannels();
+      channels.push({
+        id: telegramChannel.chatID,
+        name: telegramChannel.chatTitle,
+        platform: 'telegram'
+      })
+    }
+
     return channels;
   }
 
@@ -328,6 +374,7 @@ class ChatBotManager {
         })
       }
     }
+
     return members;
   }
 
