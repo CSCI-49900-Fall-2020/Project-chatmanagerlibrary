@@ -1,5 +1,6 @@
 const DiscordBot = require('./discordBot')
-const { SlackBot } = require('./slackBot');
+const SlackBot = require('./slackBot')
+const TelegramBot = require('./telegramBot')
 
 class BotManager {
     constructor(...options){
@@ -17,6 +18,12 @@ class BotManager {
                     } else {
                         throw "please provide appropriate credentials for discord {token}"
                     }
+                } else if(options[0].platform == "telegram"){
+                    if(options[0].token){
+                        this.telegramBot = new TelegramBot(options[0].token);
+                    } else {
+                        throw "please provide appropriate credentials for telegram {token}"
+                    }
                 }
             } else {
                 throw "please provide a platform {platform}"
@@ -26,6 +33,21 @@ class BotManager {
         }
     }
 
+    sync(...options){
+        if(this.telegramBot){
+            if(options.length > 0){
+                if(options[0].context){
+                    this.telegramBot.sync(options[0].context)
+                } else {
+                    throw "please provide appropriate parameters for telegram {context}"
+                }
+            } else {
+                throw "please provide appropriate parameters for telegram {context}"
+            }
+        } else {
+            throw "this method only applies to telegram"
+        }
+    }
     start(...options){
         if(this.slackBot){
             if(options.length > 0){
@@ -39,6 +61,8 @@ class BotManager {
             } 
         } else if(this.discordBot) {
             return this.discordBot.start()
+        } else if(this.telegramBot){
+            return this.telegramBot.start()
         }
     }
 
@@ -86,7 +110,13 @@ class BotManager {
                 } else {
                     throw "please choose an appropriate options for discord {message}"
                 }
-            } 
+            }  else if(this.telegramBot){
+                if(options[0].message){
+                    return this.telegramBot.sendMessageToAllChannels(options[0].message)
+                } else {
+                    throw "please choose an appropriate options for telegram {message}"
+                }
+            }
         } else {
             throw "please choose an appropriate options {message}"
         }
@@ -117,6 +147,8 @@ class BotManager {
             return this.slackBot.getChannels()
         } else if(this.discordBot){
             return this.discordBot.getChannels()
+        } else if(this.telegramBot){
+            return this.telegramBot.getChannels()
         }
     }
 
@@ -165,6 +197,12 @@ class BotManager {
                     return this.discordBot.sendFileToUser(options[0].userId, options[0].filePath)
                 } else {
                     throw "please choose an appropriate options for discord {channelId or userId, filePath}"
+                }
+            } else if(this.telegramBot){
+                if(options[0].filePath){
+                    return this.telegramBot.sendFile(options[0].filePath)
+                } else {
+                    throw "please choose an appropriate options for telegram {filePath}"
                 }
             }
         } else {
@@ -218,6 +256,8 @@ class BotManager {
                 if(options[0].command){
                     return this.discordBot.addCustomCommand(options[0].command)
                 }
+            } else {
+                throw "please choose an appropriate options for discord {command}"
             }
         }
     }
@@ -235,30 +275,10 @@ class BotManager {
             }
         } else if(this.discordBot) {
             return this.discordBot.stop()
+        } else if(this.telegramBot){
+            return this.telegramBot.quit()
         }
     }
 }
 
 module.exports = BotManager
-
-// test1 = new BotManager({platform: "discord", token: process.env.DISCORD_BOT_TOKEN});
-// test2 = new BotManager({platform: "slack", token: process.env.SLACK_BOT_TOKEN, signingSecret: process.env.SLACK_SIGNING_SECRET})
-
-// test1.start().then(() => {
-//     test1.sendMessageToAllChannels({message: "sendMessageToAllChannels"})
-//     test1.sendMessageToChannel({channelId: "789019543560912916", message: "testing"})
-//     test1.getChannels().then(result => console.log(result))
-//     test1.getMembers().then(result => console.log(result))
-//     test1.sendDirectMessage({userId: "346039246366441472", message: "test"})
-//     test1.sendFile({userId: "346039246366441472", filePath: "./src/test_files/source.gif"})   // send to user
-//     test1.sendFile({channelId: "789019543560912916", filePath: "./src/test_files/source.gif"})  // send to channel
-// })
-
-// test2.start({eventsPort: 3000, messagesPort: 3001})
-// test2.sendMessageToAllChannels({message: "test"})
-// test2.sendMessageToChannel({channelId: "D01AADTNTLP", message: "testing"})
-// test2.getChannels().then(result => console.log(result))
-// test2.getMembers().then(result => console.log(result))
-// test2.sendDirectMessage({userId: "U01AA5TPE75", message: "testing"})
-// test2.sendFile({userId: "U01AA5TPE75", filePath: "./src/test_files/source.gif"}) // send to user
-// test2.sendFile({channelId: "D01AADTNTLP", filePath: "./src/test_files/source.gif"}) // send to channel
