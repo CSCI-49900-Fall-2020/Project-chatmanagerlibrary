@@ -156,7 +156,7 @@ class DiscordBot {
   }
 
   //gets results everytime a google form is submitted
-  listenForGoogleFormSubmissions(port, callback){
+  listenForGoogleFormSubmissions(port){
     http.createServer((request) => {
       let answers = [];
       request.on('error', (err) => {
@@ -165,12 +165,12 @@ class DiscordBot {
         answers.push(bodyData);
       }).on('end', async () => {
         answers = await Buffer.concat(answers).toString();
-        callback(answers);
+        emitter.emit('formSubmitted', answers);
       })
     }).listen(port);
   }
 
-  listenForFormsWithExpress(callback){
+  listenForForms(callback){
     emitter.on('formSubmitted', (data) => {
       callback(data);
     })
