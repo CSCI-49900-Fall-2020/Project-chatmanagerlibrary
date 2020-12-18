@@ -157,4 +157,4 @@ class SlackBot {
     }
 }
 
-exports.SlackBot = SlackBot;
+module.exports= SlackBot;
