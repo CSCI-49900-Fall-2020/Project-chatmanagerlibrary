@@ -3,7 +3,7 @@ const { WebClient }             = require('@slack/web-api'),
       { createMessageAdapter }  = require('@slack/interactive-messages'),
       { createReadStream }      = require('fs');
 
-// this class is specifically for the slacbot for bots from other platforms create a new class
+// this class is specifically for the slackbot for bots from other platforms create a new class
 class SlackBot {
     // when we use new Slackbot you must specify the slack bot token as well as the signing secret in order to initialize it
     constructor(slackBotToken, slackSigningSecret){
@@ -21,8 +21,24 @@ class SlackBot {
       console.log(`InteractiveMessages server has started on ${interactiveMessagesServer.address().port}`);
     }
 
-    eventsExpressMiddleware(req,res,next) {
-      return this.slackEvents.expressMiddleware(req,res,next);
+    async start() {
+        this.slackEvents.on('message', async (event) => {
+            const userInfo = await this.webClient.users.info({user: event.user})
+            const sender = {
+                userId: event.user,
+                userName: userInfo.user.name,
+                platform: 'slack'
+            };
+
+            if (this.onMessageReceived) {
+                this.onMessageReceived(event.text, sender);
+                console.log(`${event.text}, sender ${sender}`);
+            }
+        });
+    }
+
+    requestMessageListener() {
+        return this.slackEvents.requestListener();
     }
 
     interactiveMessagesExpressMiddleware(req,res,next) {
