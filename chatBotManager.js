@@ -3,12 +3,29 @@ const { SlackBot } = require('./slackBot')
 const TelegramBot = require('./telegramBot')
 
 class ChatBotManager {
+
+  /**
+   * @param {Object} option - The chatBotManager configuration option
+   * @param {Object} option.slackBotConfig - slack bot configuration
+   * @param {string} option.slackBotConfig.signingSecret - slack bot signing secret
+   * @param {string} option.slackBotConfig.slashCommandPath - slack slash express middleware path
+   * @param {Object} option.discordBotConfig - discord bot configuration
+   * @param {string} option.discordBotConfig.token - discord bot token
+   * @param {Object} option.commandConfig - command configuration
+   * @param {Object} option.commandConfig.privateMessage - private message command
+   * @param {Object} option.commandConfig.groupMessage - group message command
+   * @param {Object} option.commandConfig.sendFile - send file command
+   * @param {Object} option.commandConfig.help - help command
+   * @param {Object} option.commandConfig.list - list command
+   */
   constructor(option) {
     const {
       slackBotConfig,
       discordBotConfig,
       telegramBotConfig
     } = option;
+
+    this.commandListener = {}
 
     // check if we have slack config
     if (slackBotConfig) {
@@ -38,7 +55,20 @@ class ChatBotManager {
     this.option = option;
   }
 
+  /**
+   * Initialize the bot manager and start command listener service
+   * @param {Object} app - The express app object
+   * @returns {Promise[]} An promise object array for bot initialization
+   */
   start(app) {
+    const commandConfig = this.option.commandConfig || {
+      directMessage: 'pm',
+      groupMessage: 'gm',
+      sendFile: 'file',
+      help: 'help',
+      list: 'ls',
+    }
+
     const allPromise = [];
 
     if (this.discordBot) {
@@ -50,38 +80,151 @@ class ChatBotManager {
       const {
         eventPort,
         interactiveMessagePort,
-        slackEventAPIPath,
-        slackSlashCommandPath,
       } = this.option.slackBotConfig;
 
       // create an slack app if there's no existing app running
       if (app) {
-        if (slackSlashCommandPath == null) {
-          throw 'slackSlashCommandPath is not provided for slack command slash listener'
-        }
-
-        app.use('/slack-command', this.slackBot.getSlashCommandListener());
+        // use '/slack-command' as slash command path by default
+        const slackSlashCommandPath = this.option.slackBotConfig.slashCommandPath || 'slack-command'
+        app.use(`/${slackSlashCommandPath}`, this.slackBot.getSlashCommandListener());
       } else {
         const res = this.slackBot.start(eventPort, interactiveMessagePort);  
         allPromise.push(res);
       }
     }
 
+
     if (this.telegramBot) {
-      const res = this.telegramBot.start();
-      allPromise.push(res);
+        const res = this.telegramBot.start();
+        allPromise.push(res);
+      }
+
+      return allPromise;
+    }
+
+    // command: the command sent by the user
+    // commandArgs: the command arguments sent by the user
+    // sender: where the command sent from
+    const onCommandReceived = async (command, commandArgs, sender) => {
+      if (command === commandConfig.directMessage) {
+        const tmp = commandArgs.split(' ');
+        const platform = tmp.shift();
+        const userId = tmp.shift();
+        const message = tmp.join(' ')  + ` (sent from ${sender.userName} on ${sender.platform})`;
+        const data = {
+          platform,
+          userId,
+          message,
+          sender,
+        };
+
+        await this.sendDirectMessage(data);
+        return {
+          "result": "message sent",
+        };
+      } else if (command === commandConfig.groupMessage) {
+        const tmp = commandArgs.split(' ');
+        const platform = tmp.shift();
+        const channelId = tmp.shift();
+        const message = tmp.join(' ') + `(sent from ${sender.username} on ${sender.platform})`;
+        const data = {
+          platform,
+          channelId,
+          message,
+          sender,
+        };
+
+        await this.sendMessageChannel(data);
+        return {
+          "result": "message sent",
+        };
+      } else if (command === commandConfig.list) {
+        const tmp = commandArgs.split(' ');
+        const lsType = tmp.shift();
+        const platform = tmp.shift();
+        if (lsType === 'channel') {
+          const allChannels = await this.getChannels();
+          if (platform) {
+            return allChannels.filter(ch => ch.platform === platform);
+          }
+
+          return allChannels;
+        } if (lsType === 'member') {
+          const allMembers = await this.getMembers();
+          if (platform) {
+            return allMembers.filter(m => m.platform === platform);
+          }
+
+          return allMembers;
+        }
+      }
+
+      if (command in this.commandListener) {
+        if (this.commandListener[command]) {
+          // listener for user who would like to subscribe the command event
+          return this.commandListener[command](command, commandArgs, sender);
+        }
+      } else {
+        throw `command: ${command} doesn't exist !`
+      }
+    }
+
+
+    if (this.discordBot) {
+      this.discordBot.setCommandListener(onCommandReceived);
+    }
+
+    if (this.slackBot) {
+      this.slackBot.setCommandListener(onCommandReceived);
     }
 
     return allPromise;
   }
 
-  setupCommandListener(eventListener) {
-    if (this.discordBot) {
-      this.discordBot.setCommandListener(eventListener);
+  /**
+   * This callback type is called `eventListenerCallback` and is displayed as a global symbol.
+   * @callback eventListenerCallback
+   command, commandArgs, 'discord'
+   * @param {string} command - The command
+   * @param {string[]} commandArgs - The command arguments
+   * @param {Object} sender - Who sent the command
+   * @param {Object} sender.userId - The userId of the sender
+   * @param {Object} sender.userName - The userName of the sender
+   * @param {Object} sender.platform - The platform of the sender
+   * @return {Promise}
+   */
+
+  /**
+   * Setup the command listener for a specific command
+   * @param {command} command - the command to subscribe to
+   * @param {eventListenerCallback} eventListener - function to handle the command event
+   */
+  setupCommandListener(command, eventListener) {
+    this.commandListener[command] = eventListener;
+  }
+
+  /**
+   * This callback type is called `messageListener` and is displayed as a global symbol.
+   * @callback messageListenerCallback
+   * @param {string} message - The message content
+   * @param {Object} sender - Who sent the message
+   * @param {Object} sender.userId - The userId of the sender
+   * @param {Object} sender.userName - The userName of the sender
+   * @param {Object} sender.platform - The platform of the sender
+   * @return {Promise}
+   */
+
+  /**
+   * Set message listener
+   * @param {messageListenerCallback} messageListener - function to handle the message event
+   */
+  setMessageListener(messageListener) {
+    if (this.slackBot) {
+      this.slackBot.setMessageListener(messageListener);
     }
 
-    if (this.slackBot) {
-      this.slackBot.setCommandListener(eventListener);
+    if (this.discordBot) {
+      this.discordBot.setMessageListener(messageListener);
     }
 
     if (this.telegramBot)  {
@@ -89,6 +232,13 @@ class ChatBotManager {
     }
   }
 
+  /**
+   * Send message to all channels at a specific platform
+   * @param {Object} data - The data that's sent to the platform
+   * @param {string} data.platform - The chat app platform, eg. slack, discord, telegram
+   * @param {string} data.message - The sending message
+   * @returns {Promise} Promise of sending message to channel
+   */
   sendMessageToAllChannels(data) {
     const {
       platform,
@@ -118,6 +268,14 @@ class ChatBotManager {
     }
   }
 
+  /**
+   * Send message to a specific channel
+   * @param {Object} data - The data that's sent to the platform
+   * @param {string} data.platform - The chat app platform, eg. slack, discord, telegram
+   * @param {string} data.channelId - The channelId of the channel where the message is sent to
+   * @param {string} data.message - The sending message
+   * @returns {Promise} Promise of sending message to channel
+   */
   sendMessageChannel(data) {
     const {
       platform,
@@ -148,7 +306,10 @@ class ChatBotManager {
     }
   }
 
-  // return all the channels from multiple platforms
+  /**
+   * Get all channels info include channel ids, channel names, and platform, return all the channels from multiple platforms
+   * @returns {Object[]} A channel object array
+   */
   async getChannels() {
     const channels = [];
 
@@ -186,6 +347,10 @@ class ChatBotManager {
     return channels;
   }
 
+  /**
+   * Get all members info include user ids, user names, and platform, return all the members from multiple platforms
+   * @returns {Object[]} An user object array
+   */
   async getMembers() {
     const members = [];
     if (this.slackBot) {
@@ -213,6 +378,14 @@ class ChatBotManager {
     return members;
   }
 
+  /**
+   * Send direct message to private member at a specific platform
+   * @param {Object} data - The data that's sent to the platform
+   * @param {string} data.platform - The chat app platform, eg. slack, discord, telegram
+   * @param {string} data.userId - The users' id
+   * @param {string} data.message - The sending message
+   * @returns {Promise} Promise of sending message to a private user
+   */
   sendDirectMessage(data) {
     const {
       platform,
@@ -237,6 +410,57 @@ class ChatBotManager {
     }
   }
 
+  sendFileToChannel(data) {
+    const {
+      platform,
+      channelId,
+      url,
+    } = data;
+
+    if (platform === 'slack') {
+      if (this.slackBot) {
+        return this.slackBot.sendFileToChannel(channelId, url);
+      } else {
+        throw 'slack bot is not configured';
+      }
+    } else if (platform === 'discord') {
+      if (this.discordBot) {
+        return this.discordBot.sendFileToChannel(channelId, url);
+      } else {
+        throw 'discord bot is not configured';
+      }
+    } else {
+      throw `platform ${platform} bot is not configured`;
+    }
+  }
+
+  sendFileToUser(data) {
+    const {
+      platform,
+      userId,
+      url,
+    } = data;
+
+    if (platform === 'slack') {
+      if (this.slackBot) {
+        return this.slackBot.sendFileToUser(userId, url);
+      } else {
+        throw 'slack bot is not configured';
+      }
+    } else if (platform === 'discord') {
+      if (this.discordBot) {
+        return this.discordBot.sendFileToUser(userId, url);
+      } else {
+        throw 'discord bot is not configured';
+      }
+    } else {
+      throw `platform ${platform} bot is not configured`;
+    }
+  }
+
+  /**
+   * Stop the bot service
+   */
   stop() {
     if (this.discordBot) {
       this.discordBot.stop();

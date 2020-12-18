@@ -15,21 +15,35 @@ class DiscordBot {
     this.onCommandReceived = commandListener;
   }
 
+  setMessageListener(messageListener) {
+    this.onMessageReceived = messageListener;
+  }
+
   start() {
     const client = this.client;
     client.on('message', async (message) => {
+      const sender = {
+        userId: message.author.id,
+        userName: message.author.username,
+        platform: 'discord'
+      };
+
       if (message.content.startsWith(this.prefix)) {
         if (this.onCommandReceived) {
           const input = message.content.slice(this.prefix.length).trim().split(' ');
           const command = input.shift();
           const commandArgs = input.join(' ');
-          const result = await this.onCommandReceived(command, commandArgs, 'discord');
+          const result = await this.onCommandReceived(command, commandArgs, sender);
           return message.reply(JSON.stringify(result));
+        }
+      } else {
+        if (this.onMessageReceived) {
+          this.onMessageReceived(message.content, sender);
         }
       }
     });
-    
-     return client.login(this.token);
+
+    return client.login(this.token);
   }
 
   async sendMessageToAllChannels(msg) {
@@ -40,11 +54,11 @@ class DiscordBot {
   }
 
   async sendMessageChannel(channelId, message) {
-    const channel = await this.client.channels.fetch(channelId)
+    const channel = await this.client.channels.fetch(channelId);
     return channel.send(message);
   }
 
-  // fetch the channels from discord sserver
+  // fetch the channels from discord server
   async fetchChannelsInternal() {
     let allChannels = [];
 
@@ -114,6 +128,18 @@ class DiscordBot {
     return this.client.destroy();
   }
 
+  async sendFileToChannel(channelId, url) {
+    const channel = await this.client.channels.fetch(channelId);
+    const attachment = new MessageAttachment(url);
+    return channel.send(attachment);
+  }
+
+  async sendFileToUser(userId, url) {
+    const user = await this.client.users.fetch(userId);
+    const attachment = new MessageAttachment(url);
+    return user.send(attachment);
+  }
+
   // send files to discord channel given the file path and channel
   async sendFile(filePath, channelId, callback){
     this.client.on('ready', async () => {
@@ -130,7 +156,7 @@ class DiscordBot {
   }
 
   //gets results everytime a google form is submitted
-  listenForGoogleFormSubmissions(port, callback){
+  listenForGoogleFormSubmissions(port){
     http.createServer((request) => {
       let answers = [];
       request.on('error', (err) => {
@@ -139,12 +165,12 @@ class DiscordBot {
         answers.push(bodyData);
       }).on('end', async () => {
         answers = await Buffer.concat(answers).toString();
-        callback(answers);
+        emitter.emit('formSubmitted', answers);
       })
     }).listen(port);
   }
 
-  listenForFormsWithExpress(callback){
+  listenForForms(callback){
     emitter.on('formSubmitted', (data) => {
       callback(data);
     })
