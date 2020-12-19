@@ -136,7 +136,7 @@ Creating a bot was straightforward with the use of Telegram’s Botfather. From 
 
 On a brighter note, however, implementing the functionality to send messages and files to and from Telegram was possible and thanks to our experience implementing these functionalities for Slack and Discord, it was relatively easy to do this after reading the Telegraf API and Telegram API documentation. What was interesting about providing support for Telegram was its file management. Slack and Discord allow for files to be sent as attachments regardless of their type. The Telegraf API, however, has individual functions depending on the type of file. There was one function to send videos, one to send photos, and one to send documents. We implemented each separately and then wrapped them in one function to allow for similarly seamless functionality as in Slack and Discord. 
 
-## Conclusion and Further Work:
+## Conclusion and Further Work
 
   
 
