@@ -7,7 +7,7 @@
 * [Introduction](#Introduction)
 * [Main](#Content)
 * [Conclusion and Further Work](#Conclusion-and-Further-Work)
-***[Group Authored Section](https://github.com/CSCI-49900-Fall-2020/project-chatmanagerlibrary/wiki)***
+*[Group Authored Section](https://github.com/CSCI-49900-Fall-2020/project-chatmanagerlibrary/wiki)*
 
 
 
