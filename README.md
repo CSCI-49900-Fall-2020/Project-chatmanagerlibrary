@@ -7,7 +7,6 @@
 * [Introduction](#Introduction)
 * [Main](#Content)
 * [Conclusion and Further Work](#Conclusion-and-Further-Work)
-*[Group Authored Section](https://github.com/CSCI-49900-Fall-2020/project-chatmanagerlibrary/wiki)*
 
 
 
@@ -157,3 +156,5 @@ Reference:
 10. https://www.npmjs.com/package/documentation 
 11. https://docute.org/guide/deployment#github-pages
 12. https://www.npmjs.com/package/@slack/events-API
+
+***[Group Authored Section](https://github.com/CSCI-49900-Fall-2020/project-chatmanagerlibrary/wiki)***
