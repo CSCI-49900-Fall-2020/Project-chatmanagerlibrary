@@ -144,17 +144,17 @@ Chatmanager Library addresses the problem of high cost development, fractured co
 
 
 Reference:
-https://www.udemy.com/share/101WGiBEoccl1XQ38=/
-https://API.slack.com/methods
-https://Discord.com/developers/docs/intro
-https://docs.microsoft.com/en-us/graph/teams-concept-overview
-https://feathersjs.com/
-https://www.serverless.com/
-https://slack.dev/node-slack-sdk/tutorials/local-development
-https://slack.dev/node-slack-sdk/interactive-messages
-https://github.com/slackAPI/node-slack-sdk
- https://www.npmjs.com/package/documentation 
- https://docute.org/guide/deployment#github-pages
- https://www.npmjs.com/package/@slack/events-API
+1. https://www.udemy.com/share/101WGiBEoccl1XQ38=/
+2. https://API.slack.com/methods
+3. https://Discord.com/developers/docs/intro
+4. https://docs.microsoft.com/en-us/graph/teams-concept-overview
+5. https://feathersjs.com/
+6. https://www.serverless.com/
+7. https://slack.dev/node-slack-sdk/tutorials/local-development
+8. https://slack.dev/node-slack-sdk/interactive-messages
+9. https://github.com/slackAPI/node-slack-sdk
+10. https://www.npmjs.com/package/documentation 
+11. https://docute.org/guide/deployment#github-pages
+12. https://www.npmjs.com/package/@slack/events-API
 
 ***[Group Authored Section](https://github.com/CSCI-49900-Fall-2020/project-chatmanagerlibrary/wiki)***
